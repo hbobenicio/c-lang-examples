@@ -1,8 +1,8 @@
-#ifndef NATURAL_PARSER_H
-#define NATURAL_PARSER_H
+#ifndef NATURAL_PARSER_PARSER_H
+#define NATURAL_PARSER_PARSER_H
 
-#include "lexer.h"
-#include "ast/ast.h"
+#include <natural-parser/lexer.h>
+#include <natural-parser/ast/ast.h>
 
 typedef struct {
     NaturalLexer lexer;
