@@ -1,33 +1,44 @@
+/**
+ * @brief A simple implementation of a Hash Table using Open Addressing for collisions
+ * @author Hugo Benicio <hbobenicio@gmail.com>
+ * 
+ * Many thanks to Bob Nystrom for this:
+ * https://craftinginterpreters.com/hash-tables.html
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <assert.h>
 #include <math.h>
 
-// API could be improved if this could be controlled by the user
+#define EXIT_IF_TRUE(condition, msg) \
+    do { \
+        if (condition) { \
+            perror("error: fatal: " msg); \
+            exit(EXIT_FAILURE); \
+        } \
+    } while(0)
+
+// API can be improved if this could be defined by the user
 struct hash_table_entry {
+    /**
+     * @brief The entry key. NULL is not a valid entry, because we'll use it as a flag to detect unused entries.
+     * 
+     */
     char* key;
     int value;
-
-    /**
-     * @brief Singly Linked List used in case of hash collitions.
-     */
-    struct hash_table_entry* next;
 };
 
 struct hash_table {
     /**
-     * @brief The table of entries itself. It's an array of pointers to entries.
-     * 
-     * This could be a dynamic array which grows by a factor when insertin items,
-     * but this improvement will not be done atm. For now, we only use a fixed
-     * amount of items.
+     * @brief The table of entries itself. It's just a dynamic array of entries.
      */
-    struct hash_table_entry** entries;
+    struct hash_table_entry* entries;
     /**
-     * @brief The capacity of the entries. Stores how much space has been heap-allocated.
+     * @brief The capacity of the entries array. Indicates how much space has been heap-allocated for it.
      */
-    size_t entries_capacity;
+    size_t capacity;
     /**
      * @brief Counter of items that had been stored in the table.
      */
@@ -36,101 +47,69 @@ struct hash_table {
 
 void hash_table_init(struct hash_table* ht, size_t size);
 void hash_table_free(struct hash_table* ht);
-size_t hash_char_array(const char* s, size_t s_len, size_t max);
-struct hash_table_entry* hash_table_entry_new(const char* key, int value);
-void hash_table_entry_free(struct hash_table_entry* entry);
 void hash_table_put(struct hash_table* ht, const char* key, int value);
 int* hash_table_get(struct hash_table* ht, const char* key);
 void hash_table_fdump(struct hash_table* ht, FILE* file);
 
+void hash_table_entry_free(struct hash_table_entry* entry);
+
+uint32_t hash_fnv_1a(const char* key, size_t key_len);
+
 void hash_table_init(struct hash_table* ht, size_t size)
 {
-    ht->entries = calloc(size, sizeof(struct hash_table_entry*));
-    if (ht->entries == NULL) {
-        perror("error: could not heap-allocate memory for hash table");
-        exit(EXIT_FAILURE);
-    }
-    ht->entries_capacity = size;
+    ht->entries = calloc(size, sizeof(struct hash_table_entry));
+    EXIT_IF_TRUE(ht->entries == NULL, "failed to allocate memory for hash table");
+
+    ht->capacity = size;
     ht->count = 0;
 }
 
 void hash_table_free(struct hash_table* ht)
 {
-    for (size_t i = 0; i < ht->entries_capacity; i++) {
-        struct hash_table_entry* entry = ht->entries[i];
-        while(entry != NULL) {
-            struct hash_table_entry* next = entry->next;
-            hash_table_entry_free(entry);
-            entry = next;
+    for (size_t i = 0; i < ht->capacity; i++) {
+        if (ht->entries[i].key) {
+            free(ht->entries[i].key);
         }
     }
     free(ht->entries);
     ht->entries = NULL;
-    ht->entries_capacity = ht->count = 0;
+    ht->capacity = ht->count = 0;
 }
 
 /**
  * @brief Calculates the hash of a array of chars.
- * 
- * Borrowed from https://cp-algorithms.com/string/string-hashing.html
- * 
- * @param s char array to be hashed
- * @param s_len lenght of the array
- * @return size_t hash number
  */
-size_t hash_char_array(const char* s, size_t s_len, size_t max)
+uint32_t hash_fnv_1a_32(const char* key, size_t key_len)
 {
-    size_t h = 0;
+#define FNV_1A_32_OFFSET_BASIS 2166136261u
+#define FNV_1A_32_PRIME 16777619
 
-    // It is reasonable to make a prime number roughly equal to the number of characters in the input alphabet.
-    // For example, if the input is composed of only lowercase letters of the English alphabet, is a good choice.
-    // If the input may contain both uppercase and lowercase letters, then is a possible choice
-    static const size_t p = 53;
+    uint32_t hash = FNV_1A_32_OFFSET_BASIS;
 
-    // This is a large number, but still small enough so that we can perform multiplication of two values using 64-bit integers
-    // static const size_t m = 1e9 + 9;
-
-    for (size_t i = 0; i < s_len; i++) {
-        // Precomputing the powers of might give a performance boost.
-        h = (h + s[i] * (size_t) pow((double)p, (double)i)) % max;
+    for (size_t i = 0; i < key_len; i++) {
+        hash ^= (uint8_t) key[i];
+        hash *= FNV_1A_32_PRIME;
     }
 
-    return h;
-}
+    return hash;
 
-struct hash_table_entry* hash_table_entry_new(const char* key, int value)
-{
-    struct hash_table_entry* new_entry = malloc(sizeof(struct hash_table_entry));
-    if (new_entry == NULL) {
-        perror("error: could not heap-allocate memory for an new hash table entry");
-        exit(EXIT_FAILURE);
-    }
-
-    size_t key_len = strlen(key);
-    size_t key_capacity = key_len + 1;
-    new_entry->key = malloc(key_capacity * sizeof(new_entry->key));
-    strncpy(new_entry->key, key, key_capacity);
-
-    new_entry->value = value;
-    new_entry->next = NULL;
-    
-    return new_entry;
+#undef FNV_1A_32_PRIME
+#undef FNV_1A_32_OFFSET_BASIS
 }
 
 void hash_table_entry_free(struct hash_table_entry* entry)
 {
-    free(entry->key);
-    entry->key = NULL;
-
-    free(entry);
+    if (entry->key) {
+        free(entry->key);
+        entry->key = NULL;
+    }
 }
 
 void hash_table_put(struct hash_table* ht, const char* key, int value)
 {
-    size_t index = hash_char_array(key, strlen(key), ht->entries_capacity);
+    size_t index = hash_fnv_1a(key, strlen(key)) % ht->capacity;
     
-    struct hash_table_entry* entry = ht->entries[index];
-    if (entry == NULL) {
+    if (ht->entries[index].key == NULL) {
         ht->entries[index] = hash_table_entry_new(key, value);
         return;
     }
@@ -152,7 +131,7 @@ void hash_table_put(struct hash_table* ht, const char* key, int value)
 
 int* hash_table_get(struct hash_table* ht, const char* key)
 {
-    size_t index = hash_char_array(key, strlen(key), ht->entries_capacity);
+    size_t index = hash_fnv_1a(key, strlen(key), ht->capacity);
     struct hash_table_entry* entry = ht->entries[index];
     if (entry == NULL) {
         return NULL;
@@ -163,7 +142,7 @@ int* hash_table_get(struct hash_table* ht, const char* key)
 
 void hash_table_fdump(struct hash_table* ht, FILE* file)
 {
-    for (size_t i = 0; i < ht->entries_capacity; i++) {
+    for (size_t i = 0; i < ht->capacity; i++) {
         struct hash_table_entry* entry = ht->entries[i];
         if (entry) {
             fprintf(file, "[%zu]: ", i);
