@@ -67,9 +67,7 @@ void hash_table_init(struct hash_table* ht, size_t size)
 void hash_table_free(struct hash_table* ht)
 {
     for (size_t i = 0; i < ht->capacity; i++) {
-        if (ht->entries[i].key) {
-            free(ht->entries[i].key);
-        }
+        hash_table_entry_free(&ht->entries[i]);
     }
     free(ht->entries);
     ht->entries = NULL;
@@ -107,26 +105,37 @@ void hash_table_entry_free(struct hash_table_entry* entry)
 
 void hash_table_put(struct hash_table* ht, const char* key, int value)
 {
-    size_t index = hash_fnv_1a(key, strlen(key)) % ht->capacity;
-    
-    if (ht->entries[index].key == NULL) {
-        ht->entries[index] = hash_table_entry_new(key, value);
-        return;
-    }
+    assert(key != NULL && "NULL keys not allowed here because we use it to check if entry is empty");
 
-    struct hash_table_entry* prev;
-    while (entry != NULL) {
-        // Same key, update it's value
-        if (strcmp(entry->key, key) == 0) {
+    size_t key_len = strlen(key);
+    size_t index = hash_fnv_1a(key, key_len) % ht->capacity;
+
+    //TODO calculate load factor
+    //TODO if load factor >= some threshold, then reallocate the entries
+    {
+        struct hash_table_entry* entry = &ht->entries[index];
+        if (entry->key == NULL) {
+            entry->key = calloc(key_len, sizeof(char));
+            strcpy(entry->key, key);
             entry->value = value;
             return;
         }
-        prev = entry;
-        entry = entry->next;
     }
 
-    // Collision. Append to the linked list
-    prev->next = hash_table_entry_new(key, value);
+    size_t i = index;
+    {
+        size_t count = 0;
+        while (ht->entries[i].key != NULL) {
+            assert(count < ht->capacity);
+            count++;
+            i = (i + 1) % ht->capacity;
+        }
+    }
+    struct hash_table_entry* entry = &ht->entries[i];
+
+    entry->key = calloc(key_len, sizeof(char));
+    strcpy(entry->key, key);
+    entry->value = value;
 }
 
 int* hash_table_get(struct hash_table* ht, const char* key)
@@ -159,8 +168,7 @@ int main()
 {
     puts("=== Hash Table implementation ===");
     struct hash_table ht;
-    // hash_table_init(&ht, 1e9 + 9);
-    hash_table_init(&ht, 10);
+    hash_table_init(&ht, 8);
 
     fputs("Inserting 'hugo' => 2\n", stderr);
     hash_table_put(&ht, "hugo", 2);
