@@ -53,7 +53,7 @@ void hash_table_fdump(struct hash_table* ht, FILE* file);
 
 void hash_table_entry_free(struct hash_table_entry* entry);
 
-uint32_t hash_fnv_1a(const char* key, size_t key_len);
+uint32_t hash_fnv_1a_32(const char* key, size_t key_len);
 
 void hash_table_init(struct hash_table* ht, size_t size)
 {
@@ -108,41 +108,55 @@ void hash_table_put(struct hash_table* ht, const char* key, int value)
     assert(key != NULL && "NULL keys not allowed here because we use it to check if entry is empty");
 
     size_t key_len = strlen(key);
-    size_t index = hash_fnv_1a(key, key_len) % ht->capacity;
+    size_t index = hash_fnv_1a_32(key, key_len) % ht->capacity;
 
     //TODO calculate load factor
     //TODO if load factor >= some threshold, then reallocate the entries
     {
         struct hash_table_entry* entry = &ht->entries[index];
         if (entry->key == NULL) {
-            entry->key = calloc(key_len, sizeof(char));
+            entry->key = calloc(key_len + 1, sizeof(char));
             strcpy(entry->key, key);
             entry->value = value;
+            ht->count++;
             return;
         }
     }
 
     size_t i = index;
-    {
-        size_t count = 0;
-        while (ht->entries[i].key != NULL) {
-            assert(count < ht->capacity);
-            count++;
-            i = (i + 1) % ht->capacity;
-        }
+    size_t count = 0;
+    while (ht->entries[i].key != NULL && strcmp(ht->entries[i].key, key) != 0) {
+        assert(++count < ht->capacity);
+        i = (i + 1) % ht->capacity;
     }
     struct hash_table_entry* entry = &ht->entries[i];
 
-    entry->key = calloc(key_len, sizeof(char));
+    if (entry->key == NULL) {
+        entry->key = calloc(key_len + 1, sizeof(char));
+        ht->count++;
+    }
     strcpy(entry->key, key);
     entry->value = value;
 }
 
 int* hash_table_get(struct hash_table* ht, const char* key)
 {
-    size_t index = hash_fnv_1a(key, strlen(key), ht->capacity);
-    struct hash_table_entry* entry = ht->entries[index];
-    if (entry == NULL) {
+    size_t index = hash_fnv_1a_32(key, strlen(key)) % ht->capacity;
+
+    struct hash_table_entry* entry = &ht->entries[index];
+    if (entry->key == NULL) {
+        return NULL;
+    }
+
+    size_t count = 0;
+    while (strcmp(entry->key, key) != 0 && entry->key != NULL) {
+        if (++count < ht->count) {
+            return NULL;
+        }
+        index = (index + 1) % ht->capacity;
+        entry = &ht->entries[index];
+    }
+    if (entry->key == NULL) {
         return NULL;
     }
 
@@ -152,14 +166,9 @@ int* hash_table_get(struct hash_table* ht, const char* key)
 void hash_table_fdump(struct hash_table* ht, FILE* file)
 {
     for (size_t i = 0; i < ht->capacity; i++) {
-        struct hash_table_entry* entry = ht->entries[i];
-        if (entry) {
-            fprintf(file, "[%zu]: ", i);
-            while (entry != NULL) {
-                fprintf(file, "%s => %d, ", entry->key, entry->value);
-                entry = entry->next;
-            }
-            fputc('\n', file);
+        struct hash_table_entry* entry = &ht->entries[i];
+        if (entry->key) {
+            fprintf(file, "[%zu]: %s => %d\n", i, entry->key, entry->value);
         }
     }
 }
