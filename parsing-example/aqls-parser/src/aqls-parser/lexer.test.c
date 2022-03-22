@@ -17,6 +17,8 @@
 
 static void test_fixture_minimal(const char* fixtures_path, size_t fixtures_path_len)
 {
+    (void) fixtures_path_len;
+
     const char* fixture_file_name = "minimal.nsp";
     char fixture_file_path[2048];
     snprintf(fixture_file_path, sizeof(fixture_file_path) - 1, "%s/%s", fixtures_path, fixture_file_name);
@@ -45,6 +47,8 @@ static void test_fixture_minimal(const char* fixtures_path, size_t fixtures_path
 
 static void test_fixture_hello_world(const char* fixtures_path, size_t fixtures_path_len)
 {
+    (void) fixtures_path_len;
+
     const char* fixture_file_name = "hello-world.nsp";
     char fixture_file_path[2048];
     snprintf(fixture_file_path, sizeof(fixture_file_path) - 1, "%s/%s", fixtures_path, fixture_file_name);

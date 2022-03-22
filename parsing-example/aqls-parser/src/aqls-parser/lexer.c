@@ -122,6 +122,12 @@ AqlsToken aqls_lexer_peek_token(AqlsLexer* lexer)
 
 size_t aqls_lexer_peek_tokens(AqlsLexer* lexer, size_t n, AqlsToken* tokens)
 {
+    (void) lexer;
+    (void) n;
+    (void) tokens;
+
+    //TODO implement
+    
     return 0;
 }
 
