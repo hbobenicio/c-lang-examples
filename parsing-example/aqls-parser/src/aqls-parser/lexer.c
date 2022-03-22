@@ -12,14 +12,14 @@
 
 #include "utils.h"
 
-#define NATURAL_LOOKAHEAD 10
+#define AQLS_LOOKAHEAD 10
 
 static void regex_compile_or_die(regex_t* regex, const char* pattern, int flags);
-static void skip_ignored(NaturalLexer* lexer);
-static void advance(NaturalLexer* lexer, size_t offset);
-static void advance_token(NaturalLexer* lexer, NaturalToken token);
+static void skip_ignored(AqlsLexer* lexer);
+static void advance(AqlsLexer* lexer, size_t offset);
+static void advance_token(AqlsLexer* lexer, AqlsToken token);
 
-void natural_lexer_init(NaturalLexer* lexer, const char* input, size_t input_len)
+void aqls_lexer_init(AqlsLexer* lexer, const char* input, size_t input_len)
 {
     // input initialization
     lexer->input = input;
@@ -30,34 +30,34 @@ void natural_lexer_init(NaturalLexer* lexer, const char* input, size_t input_len
     lexer->pos = 0;
     
     // lookahead initialization
-    natural_token_queue_init(&lexer->lookahead, NATURAL_LOOKAHEAD);
+    aqls_token_queue_init(&lexer->lookahead, AQLS_LOOKAHEAD);
 
     // regex initialization
     // TODO check if I need another flag for keep scanning beyond the new lines
     regex_compile_or_die(&lexer->ignore, "^[ \t\r\n]+", REG_EXTENDED);
 
     regex_compile_or_die(&lexer->patterns[0].regex, "^'[^']*'", REG_EXTENDED);
-    lexer->patterns[0].token_kind = NATURAL_TOKEN_STRING_LITERAL;
+    lexer->patterns[0].token_kind = AQLS_TOKEN_STRING_LITERAL;
 
     regex_compile_or_die(&lexer->patterns[1].regex, "^[a-zA-Z#][a-zA-Z#\\.]*", REG_EXTENDED | REG_ICASE);
-    lexer->patterns[1].token_kind = NATURAL_TOKEN_ID;
+    lexer->patterns[1].token_kind = AQLS_TOKEN_ID;
 }
 
-bool natural_lexer_has_more_tokens(const NaturalLexer* lexer)
+bool aqls_lexer_has_more_tokens(const AqlsLexer* lexer)
 {
     return lexer->pos < lexer->input_len;
 }
 
-NaturalToken natural_lexer_peek_token(NaturalLexer* lexer)
+AqlsToken aqls_lexer_peek_token(AqlsLexer* lexer)
 {
     // if we have the token already in our lookahead queue, just return it right away
-    if (!natural_token_queue_is_empty(&lexer->lookahead)) {
-        return natural_token_queue_peek(&lexer->lookahead);
+    if (!aqls_token_queue_is_empty(&lexer->lookahead)) {
+        return aqls_token_queue_peek(&lexer->lookahead);
     }
 
-    if (!natural_lexer_has_more_tokens(lexer)) {
-        NaturalToken eof = natural_token_eof();
-        natural_token_queue_append(&lexer->lookahead, eof);
+    if (!aqls_lexer_has_more_tokens(lexer)) {
+        AqlsToken eof = aqls_token_eof();
+        aqls_token_queue_append(&lexer->lookahead, eof);
         return eof;
     }
 
@@ -81,12 +81,12 @@ NaturalToken natural_lexer_peek_token(NaturalLexer* lexer)
     }
     
     if (pos >= lexer->input_len) {
-        NaturalToken eof = natural_token_eof();
-        natural_token_queue_append(&lexer->lookahead, eof);
+        AqlsToken eof = aqls_token_eof();
+        aqls_token_queue_append(&lexer->lookahead, eof);
         return eof;
     }
 
-    for (size_t i = 0; i < NATURAL_LEXER_PATTERNS_LEN; i++) {
+    for (size_t i = 0; i < AQLS_LEXER_PATTERNS_LEN; i++) {
         regmatch_t match;
         int rc = regexec(&lexer->patterns[i].regex, cursor, 1, &match, REG_NOTEOL);
         if (rc == REG_NOMATCH) {
@@ -96,7 +96,7 @@ NaturalToken natural_lexer_peek_token(NaturalLexer* lexer)
         int match_len = match.rm_eo - match.rm_so;
         assert(match_len > 0);
 
-        NaturalToken token = {
+        AqlsToken token = {
             .kind = lexer->patterns[i].token_kind,
             .lexeme = (StringView) {
                 .str = cursor,
@@ -104,31 +104,31 @@ NaturalToken natural_lexer_peek_token(NaturalLexer* lexer)
             },
         };
 
-        natural_token_queue_append(&lexer->lookahead, token);
+        aqls_token_queue_append(&lexer->lookahead, token);
         return token;
     }
 
     // TODO should I save the byte position here? should it be in the token?
-    NaturalToken error_token = {
-        .kind = NATURAL_TOKEN_ERROR,
+    AqlsToken error_token = {
+        .kind = AQLS_TOKEN_ERROR,
         .lexeme = (StringView) {
             .str = cursor,
             .len = 0,
         },
     };
-    natural_token_queue_append(&lexer->lookahead, error_token);
+    aqls_token_queue_append(&lexer->lookahead, error_token);
     return error_token;
 }
 
-size_t natural_lexer_peek_tokens(NaturalLexer* lexer, size_t n, NaturalToken* tokens)
+size_t aqls_lexer_peek_tokens(AqlsLexer* lexer, size_t n, AqlsToken* tokens)
 {
     return 0;
 }
 
-NaturalToken natural_lexer_next_token(NaturalLexer* lexer)
+AqlsToken aqls_lexer_next_token(AqlsLexer* lexer)
 {
-    if (!natural_token_queue_is_empty(&lexer->lookahead)) {
-        NaturalToken token = natural_token_queue_pop(&lexer->lookahead);
+    if (!aqls_token_queue_is_empty(&lexer->lookahead)) {
+        AqlsToken token = aqls_token_queue_pop(&lexer->lookahead);
         if (token.lexeme.str != NULL) {
             size_t offset = 0;
             for (const char* c = lexer->cursor; c != token.lexeme.str; c++) {
@@ -140,17 +140,17 @@ NaturalToken natural_lexer_next_token(NaturalLexer* lexer)
         return token;
     }
 
-    if (!natural_lexer_has_more_tokens(lexer)) {
-        return natural_token_eof();
+    if (!aqls_lexer_has_more_tokens(lexer)) {
+        return aqls_token_eof();
     }
 
     skip_ignored(lexer);
 
-    if (!natural_lexer_has_more_tokens(lexer)) {
-        return natural_token_eof();
+    if (!aqls_lexer_has_more_tokens(lexer)) {
+        return aqls_token_eof();
     }
 
-    for (size_t i = 0; i < NATURAL_LEXER_PATTERNS_LEN; i++) {
+    for (size_t i = 0; i < AQLS_LEXER_PATTERNS_LEN; i++) {
         regmatch_t match;
         int rc = regexec(&lexer->patterns[i].regex, lexer->cursor, 1, &match, REG_NOTEOL);
         if (rc == REG_NOMATCH) {
@@ -160,7 +160,7 @@ NaturalToken natural_lexer_next_token(NaturalLexer* lexer)
         int match_len = match.rm_eo - match.rm_so;
         assert(match_len > 0);
 
-        NaturalToken token = {
+        AqlsToken token = {
             .kind = lexer->patterns[i].token_kind,
             .lexeme = (StringView) {
                 .str = lexer->cursor,
@@ -172,21 +172,21 @@ NaturalToken natural_lexer_next_token(NaturalLexer* lexer)
         return token;
     }
 
-    NaturalToken error_token = {
-        .kind = NATURAL_TOKEN_ERROR,
+    AqlsToken error_token = {
+        .kind = AQLS_TOKEN_ERROR,
         .lexeme = (StringView) {
             .str = lexer->cursor,
             .len = 0,
         },
     };
-    // return natural_token_error();
+    // return aqls_token_error();
     return error_token;
 }
 
-void natural_lexer_free(NaturalLexer* lexer)
+void aqls_lexer_free(AqlsLexer* lexer)
 {
     regfree(&lexer->ignore);
-    for (size_t i = 0; i < NATURAL_LEXER_PATTERNS_LEN; i++) {
+    for (size_t i = 0; i < AQLS_LEXER_PATTERNS_LEN; i++) {
         regfree(&lexer->patterns[i].regex);
     }
     
@@ -196,10 +196,10 @@ void natural_lexer_free(NaturalLexer* lexer)
     lexer->cursor = NULL;
     lexer->pos = 0;
 
-    natural_token_queue_free(&lexer->lookahead);
+    aqls_token_queue_free(&lexer->lookahead);
 }
 
-static void skip_ignored(NaturalLexer* lexer)
+static void skip_ignored(AqlsLexer* lexer)
 {
     regmatch_t match;
     int rc = regexec(&lexer->ignore, lexer->cursor, 1, &match, REG_NOTEOL);
@@ -212,7 +212,7 @@ static void skip_ignored(NaturalLexer* lexer)
     advance(lexer, (size_t) match_len);
 }
 
-static void advance(NaturalLexer* lexer, size_t offset)
+static void advance(AqlsLexer* lexer, size_t offset)
 {
     assert(lexer->pos + offset <= lexer->input_len);
 
@@ -220,7 +220,7 @@ static void advance(NaturalLexer* lexer, size_t offset)
     lexer->cursor += offset;
 }
 
-static void advance_token(NaturalLexer* lexer, NaturalToken token)
+static void advance_token(AqlsLexer* lexer, AqlsToken token)
 {
     assert(lexer->pos + token.lexeme.len <= lexer->input_len);
 
@@ -240,17 +240,17 @@ static void regex_compile_or_die(regex_t* regex, const char* pattern, int flags)
         // We call it once again, now with the error_msg buffer to be set
         regerror(rc, regex, error_msg, error_msg_size);
 
-        fprintf(stderr, "error: natural: lexer: regex: compilation failed. pattern=\"%s\"\n", pattern);
+        fprintf(stderr, "error: aqls: lexer: regex: compilation failed. pattern=\"%s\"\n", pattern);
         exit(EXIT_FAILURE);
     }
 }
 
-void natural_lexer_get_line_column(NaturalLexer* lexer, size_t* out_line, size_t* out_column)
+void aqls_lexer_get_line_column(AqlsLexer* lexer, size_t* out_line, size_t* out_column)
 {
-    natural_lexer_get_line_column_from_pos(lexer, lexer->pos, out_line, out_column);
+    aqls_lexer_get_line_column_from_pos(lexer, lexer->pos, out_line, out_column);
 }
 
-void natural_lexer_get_line_column_from_pos(NaturalLexer* lexer, size_t pos, size_t* out_line, size_t* out_column)
+void aqls_lexer_get_line_column_from_pos(AqlsLexer* lexer, size_t pos, size_t* out_line, size_t* out_column)
 {
     *out_line = *out_column = 1;
     for (size_t i = 0; i < pos && i < lexer->input_len; i++) {
@@ -263,7 +263,7 @@ void natural_lexer_get_line_column_from_pos(NaturalLexer* lexer, size_t pos, siz
     }
 }
 
-void natural_lexer_get_line_column_from_cursor(NaturalLexer* lexer, const char* cursor, size_t* out_line, size_t* out_column)
+void aqls_lexer_get_line_column_from_cursor(AqlsLexer* lexer, const char* cursor, size_t* out_line, size_t* out_column)
 {
     *out_line = *out_column = 1;
     for (const char* c = lexer->input; c < cursor; c++) {

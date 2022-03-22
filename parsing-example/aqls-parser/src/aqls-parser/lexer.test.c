@@ -25,20 +25,20 @@ static void test_fixture_minimal(const char* fixtures_path, size_t fixtures_path
     char* fixture_content = file_read_or_panic(fixture_file_path);
     size_t fixture_content_len = strlen(fixture_content);
 
-    NaturalLexer lexer = {0};
-    natural_lexer_init(&lexer, fixture_content, fixture_content_len);
+    AqlsLexer lexer = {0};
+    aqls_lexer_init(&lexer, fixture_content, fixture_content_len);
 
-    assert(natural_lexer_has_more_tokens(&lexer) == true);
+    assert(aqls_lexer_has_more_tokens(&lexer) == true);
 
-    NaturalToken token = {0};
+    AqlsToken token = {0};
 
-    token = natural_lexer_next_token(&lexer);
-    assert(token.kind == NATURAL_TOKEN_ID);
+    token = aqls_lexer_next_token(&lexer);
+    assert(token.kind == AQLS_TOKEN_ID);
     assert(string_view_cmp_cstr(token.lexeme, "END") == 0);
 
-    token = natural_lexer_next_token(&lexer);
-    assert(token.kind == NATURAL_TOKEN_EOF);
-    assert(natural_lexer_has_more_tokens(&lexer) == false);
+    token = aqls_lexer_next_token(&lexer);
+    assert(token.kind == AQLS_TOKEN_EOF);
+    assert(aqls_lexer_has_more_tokens(&lexer) == false);
 
     fputs("\n", stderr);
 }
@@ -53,28 +53,28 @@ static void test_fixture_hello_world(const char* fixtures_path, size_t fixtures_
     char* fixture_content = file_read_or_panic(fixture_file_path);
     size_t fixture_content_len = strlen(fixture_content);
 
-    NaturalLexer lexer = {0};
-    natural_lexer_init(&lexer, fixture_content, fixture_content_len);
+    AqlsLexer lexer = {0};
+    aqls_lexer_init(&lexer, fixture_content, fixture_content_len);
 
-    assert(natural_lexer_has_more_tokens(&lexer) == true);
+    assert(aqls_lexer_has_more_tokens(&lexer) == true);
 
-    NaturalToken token = {0};
+    AqlsToken token = {0};
 
-    token = natural_lexer_next_token(&lexer);
-    assert(token.kind == NATURAL_TOKEN_ID);
+    token = aqls_lexer_next_token(&lexer);
+    assert(token.kind == AQLS_TOKEN_ID);
     assert(string_view_cmp_cstr(token.lexeme, "WRITE") == 0);
 
-    token = natural_lexer_next_token(&lexer);
-    assert(token.kind == NATURAL_TOKEN_STRING_LITERAL);
+    token = aqls_lexer_next_token(&lexer);
+    assert(token.kind == AQLS_TOKEN_STRING_LITERAL);
     assert(string_view_cmp_cstr(token.lexeme, "'HELLO, WORLD!'") == 0);
 
-    token = natural_lexer_next_token(&lexer);
-    assert(token.kind == NATURAL_TOKEN_ID);
+    token = aqls_lexer_next_token(&lexer);
+    assert(token.kind == AQLS_TOKEN_ID);
     assert(string_view_cmp_cstr(token.lexeme, "END") == 0);
 
-    token = natural_lexer_next_token(&lexer);
-    assert(token.kind == NATURAL_TOKEN_EOF);
-    assert(natural_lexer_has_more_tokens(&lexer) == false);
+    token = aqls_lexer_next_token(&lexer);
+    assert(token.kind == AQLS_TOKEN_EOF);
+    assert(aqls_lexer_has_more_tokens(&lexer) == false);
 
     fputs("\n", stderr);
 }

@@ -1,5 +1,5 @@
-#ifndef NATURAL_PARSER_STRING_VIEW_H
-#define NATURAL_PARSER_STRING_VIEW_H
+#ifndef AQLS_PARSER_STRING_VIEW_H
+#define AQLS_PARSER_STRING_VIEW_H
 
 #include <stddef.h>
 #include <stdio.h>

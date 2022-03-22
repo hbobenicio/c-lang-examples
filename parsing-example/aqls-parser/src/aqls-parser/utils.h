@@ -1,5 +1,5 @@
-#ifndef NATURAL_PARSER_UTILS_H
-#define NATURAL_PARSER_UTILS_H
+#ifndef AQLS_PARSER_UTILS_H
+#define AQLS_PARSER_UTILS_H
 
 #include "string-view.h"
 

@@ -7,57 +7,57 @@ project('parsing-example', 'c',
     ]
 )
 
-natural_parser_sources = [
-    'natural-parser/src/natural-parser/string-view.c',
-    'natural-parser/src/natural-parser/utils.c',
-    'natural-parser/src/natural-parser/token/token.c',
-    'natural-parser/src/natural-parser/token/queue.c',
-    'natural-parser/src/natural-parser/lexer.c',
-    'natural-parser/src/natural-parser/ast/ast.c',
-    'natural-parser/src/natural-parser/parser.c',
+aqls_parser_sources = [
+    'aqls-parser/src/aqls-parser/string-view.c',
+    'aqls-parser/src/aqls-parser/utils.c',
+    'aqls-parser/src/aqls-parser/token/token.c',
+    'aqls-parser/src/aqls-parser/token/queue.c',
+    'aqls-parser/src/aqls-parser/lexer.c',
+    'aqls-parser/src/aqls-parser/ast/ast.c',
+    'aqls-parser/src/aqls-parser/parser.c',
 ]
 
 # TODO create a public header directory and differentiate between them here
-natural_parser_impl_include_path = include_directories('natural-parser/src')
-natural_parser_public_include_path = include_directories('natural-parser/include')
-natural_parser_include_paths = [
-    natural_parser_impl_include_path,
-    natural_parser_public_include_path,
+aqls_parser_impl_include_path = include_directories('aqls-parser/src')
+aqls_parser_public_include_path = include_directories('aqls-parser/include')
+aqls_parser_include_paths = [
+    aqls_parser_impl_include_path,
+    aqls_parser_public_include_path,
 ]
 
-natural_parser = library('natural-parser', natural_parser_sources,
+aqls_parser = library('aqls-parser', aqls_parser_sources,
     version: '0.1.0',
     soversion: '0',
     install: false,
-    include_directories: natural_parser_include_paths,
+    include_directories: aqls_parser_include_paths,
 )
 
 # Unit Tests
-fixtures_path = '../natural-parser/test/unit/fixtures'
+fixtures_path = '../aqls-parser/test/unit/fixtures'
 
-natural_parser_unit_test_lexer = executable(
-    'natural-parser-unit-test-lexer',
-    'natural-parser/src/natural-parser/lexer.test.c',
-    include_directories: natural_parser_include_paths,
+aqls_parser_unit_test_lexer = executable(
+    'aqls-parser-unit-test-lexer',
+    'aqls-parser/src/aqls-parser/lexer.test.c',
+    include_directories: aqls_parser_include_paths,
     link_with: [
-        natural_parser,
+        aqls_parser,
     ],
 )
-test('natural-parser - lexer', natural_parser_unit_test_lexer,
+test('aqls-parser - lexer', aqls_parser_unit_test_lexer,
     args: [
         fixtures_path,
     ],
 )
 
-natural_parser_unit_test_parser = executable(
-    'natural-parser-unit-test-parser',
-    'natural-parser/src/natural-parser/parser.test.c',
-    include_directories: natural_parser_include_paths,
+aqls_parser_unit_test_parser = executable(
+    'aqls-parser-unit-test-parser',
+    'aqls-parser/src/aqls-parser/parser.test.c',
+    include_directories: aqls_parser_include_paths,
     link_with: [
-        natural_parser,
+        aqls_parser,
     ],
 )
-test('natural-parser - parser', natural_parser_unit_test_parser,
+test('aqls-parser - parser', aqls_parser_unit_test_parser,
     args: [
         fixtures_path,
     ],

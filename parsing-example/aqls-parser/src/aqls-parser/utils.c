@@ -9,7 +9,7 @@
 void* panic_if_null(void* ptr)
 {
     if (ptr == NULL) {
-        fputs("error: natural: parser: out of memory", stderr);
+        fputs("error: aqls: parser: out of memory", stderr);
         exit(EXIT_FAILURE);
     }
     return ptr;
