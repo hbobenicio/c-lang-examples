@@ -28,7 +28,7 @@ typedef struct {
     regex_t ignore;
     AqlsLexerPattern patterns[AQLS_LEXER_PATTERNS_LEN];
 
-    AqlsTokenQueue lookahead;
+    struct aqls_token_queue lookahead;
 
 } AqlsLexer;
 

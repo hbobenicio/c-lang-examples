@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-void aqls_token_queue_init(AqlsTokenQueue* queue, size_t capacity)
+void aqls_token_queue_init(struct aqls_token_queue* queue, size_t capacity)
 {
     queue->items = calloc(capacity, sizeof(AqlsToken));
     if (queue->items == NULL) {
@@ -14,12 +14,12 @@ void aqls_token_queue_init(AqlsTokenQueue* queue, size_t capacity)
     queue->len = queue->start = queue->end = 0;
 }
 
-void aqls_token_queue_free(AqlsTokenQueue* queue)
+void aqls_token_queue_free(struct aqls_token_queue* queue)
 {
     free(queue->items);
 }
 
-void aqls_token_queue_append(AqlsTokenQueue* queue, AqlsToken item)
+void aqls_token_queue_append(struct aqls_token_queue* queue, AqlsToken item)
 {
     assert(!aqls_token_queue_is_full(queue));
     
@@ -28,7 +28,7 @@ void aqls_token_queue_append(AqlsTokenQueue* queue, AqlsToken item)
     queue->len++;
 }
 
-AqlsToken aqls_token_queue_pop(AqlsTokenQueue* queue)
+AqlsToken aqls_token_queue_pop(struct aqls_token_queue* queue)
 {
     assert(!aqls_token_queue_is_empty(queue));
 
@@ -39,19 +39,19 @@ AqlsToken aqls_token_queue_pop(AqlsTokenQueue* queue)
     return token;
 }
 
-AqlsToken aqls_token_queue_peek(const AqlsTokenQueue* queue)
+AqlsToken aqls_token_queue_peek(const struct aqls_token_queue* queue)
 {
     assert(!aqls_token_queue_is_empty(queue));
 
     return queue->items[queue->start];
 }
 
-bool aqls_token_queue_is_empty(const AqlsTokenQueue* queue)
+bool aqls_token_queue_is_empty(const struct aqls_token_queue* queue)
 {
     return queue->len == 0;
 }
 
-bool aqls_token_queue_is_full(const AqlsTokenQueue* queue)
+bool aqls_token_queue_is_full(const struct aqls_token_queue* queue)
 {
     return queue->len == queue->capacity;
 }
