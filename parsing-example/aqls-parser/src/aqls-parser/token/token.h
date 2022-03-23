@@ -6,19 +6,19 @@
 
 #include <aqls-parser/string-view.h>
 
-typedef enum {
+enum aqls_token_kind {
     AQLS_TOKEN_ERROR,
     AQLS_TOKEN_EOF,
     AQLS_TOKEN_STRING_LITERAL,
     AQLS_TOKEN_ID,
-} AqlsTokenKind;
+};
 
 typedef struct {
-    AqlsTokenKind kind;
+    enum aqls_token_kind kind;
     StringView lexeme;
 } AqlsToken;
 
-const char* aqls_token_str(AqlsTokenKind kind);
+const char* aqls_token_str(enum aqls_token_kind kind);
 
 AqlsToken aqls_token_error();
 AqlsToken aqls_token_eof();

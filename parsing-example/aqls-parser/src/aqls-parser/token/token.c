@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char* aqls_token_str(AqlsTokenKind kind)
+const char* aqls_token_str(enum aqls_token_kind kind)
 {
     switch (kind)
     {

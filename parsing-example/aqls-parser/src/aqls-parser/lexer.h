@@ -14,7 +14,7 @@
 #define AQLS_LEXER_PATTERNS_LEN 2
 
 typedef struct {
-    AqlsTokenKind token_kind;
+    enum aqls_token_kind token_kind;
     regex_t regex;
 } AqlsLexerPattern;
 
