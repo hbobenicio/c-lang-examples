@@ -6,47 +6,47 @@
 #include "token.h"
 
 // Another way around maybe
-// AqlsAstCompilationUnit
-//    AqlsAstStatements
-//        AqlsAstStatement (tagged union)
+// struct aqls_ast_compilation_unit
+//    struct aqls_ast_stmts
+//        struct aqls_ast_stmt (tagged union)
 //    AqlsEndStatement
 
-typedef struct AqlsAstNode AqlsAstNode;
-typedef struct AqlsAstNodeCompilationUnit AqlsAstNodeCompilationUnit;
-typedef struct AqlsAstNodeStatementWrite AqlsAstNodeStatementWrite;
-typedef struct AqlsAstNodeStatementEnd AqlsAstNodeStatementEnd;
+struct aqls_ast_node aqls_ast_node;
+struct aqls_ast_node_compilation_unit aqls_ast_node_compilation_unit;
+struct aqls_ast_node_stmt_write aqls_ast_node_stmt_write;
+struct aqls_ast_node_statement_end aqls_ast_node_statement_end;
 
-typedef enum {
+enum aqls_ast_node_kind {
     AQLS_AST_NODE_COMPILATION_UNIT,
     AQLS_AST_NODE_STATEMENT_WRITE,
     AQLS_AST_NODE_STATEMENT_END,
-} AqlsAstNodeKind;
+};
 
-struct AqlsAstNode {
-    AqlsAstNodeKind kind;
+struct aqls_ast_node {
+    enum aqls_ast_node_kind kind;
     union {
-        AqlsAstNodeCompilationUnit* compilation_unit;
-        AqlsAstNodeStatementWrite* write_statement;
-        AqlsAstNodeStatementEnd* end_statement;
+        struct aqls_ast_node_compilation_unit* compilation_unit;
+        struct aqls_ast_node_stmt_write* write_stmt;
+        struct aqls_ast_node_statement_end* end_statement;
     } as;
 };
 
-struct AqlsAstNodeCompilationUnit {
-    AqlsAstNode* statement;
-    AqlsAstNode* end_statement;
+struct aqls_ast_node_compilation_unit {
+    struct aqls_ast_node* statement;
+    struct aqls_ast_node* end_statement;
 };
 
-struct AqlsAstNodeStatementWrite {
+struct aqls_ast_node_stmt_write {
     AqlsToken write_token;
     AqlsToken operand_token;
 };
 
-struct AqlsAstNodeStatementEnd {
+struct aqls_ast_node_statement_end {
     AqlsToken end_token;
 };
 
-AqlsAstNode* aqls_ast_new_compilation_unit(AqlsAstNode* statement, AqlsAstNode* end_statement);
-AqlsAstNode* aqls_ast_new_statement_write(AqlsToken write_token, AqlsToken operand_token);
-AqlsAstNode* aqls_ast_new_statenet_end(AqlsToken end_token);
+struct aqls_ast_node* aqls_ast_new_compilation_unit(struct aqls_ast_node* statement, struct aqls_ast_node* end_statement);
+struct aqls_ast_node* aqls_ast_new_statement_write(AqlsToken write_token, AqlsToken operand_token);
+struct aqls_ast_node* aqls_ast_new_statenet_end(AqlsToken end_token);
 
 #endif

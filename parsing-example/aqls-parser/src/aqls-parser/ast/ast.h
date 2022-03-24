@@ -6,57 +6,57 @@
 #include <aqls-parser/token/token.h>
 
 // Another way around maybe
-// AqlsAstCompilationUnit
-//    AqlsAstStatements
-//        AqlsAstStatement (tagged union)
+// struct aqls_ast_compilation_unit
+//    struct aqls_ast_stmts
+//        struct aqls_ast_stmt (tagged union)
 //    AqlsEndStatement
 
 typedef struct AqlsAst AqlsAst;
-typedef struct AqlsAstCompilationUnit AqlsAstCompilationUnit;
-typedef struct AqlsAstStatementList AqlsAstStatementList;
-typedef struct AqlsAstStatement AqlsAstStatement;
-typedef struct AqlsAstStatementWrite AqlsAstStatementWrite;
-typedef struct AqlsAstEnd AqlsAstEnd;
+struct aqls_ast_compilation_unit;
+struct aqls_ast_stmt_list;
+struct aqls_ast_stmt;
+struct aqls_ast_stmt_write;
+struct aqls_ast_end;
 
 struct AqlsAst {
-    AqlsAstCompilationUnit* compilation_unit;
+    struct aqls_ast_compilation_unit* compilation_unit;
 };
 
-struct AqlsAstCompilationUnit {
-    AqlsAstStatementList* statements;
-    AqlsAstEnd* end;
+struct aqls_ast_compilation_unit {
+    struct aqls_ast_stmt_list* statements;
+    struct aqls_ast_end* end;
 };
 
-struct AqlsAstStatementList {
-    AqlsAstStatement* statement;
-    AqlsAstStatementList* next;
+struct aqls_ast_stmt_list {
+    struct aqls_ast_stmt* statement;
+    struct aqls_ast_stmt_list* next;
 };
 
-typedef enum {
+enum aqls_ast_stmt_kind {
     AQLS_AST_STATEMENT_WRITE
-} AqlsAstStatementKind;
+};
 
-struct AqlsAstStatement {
-    AqlsAstStatementKind kind;
+struct aqls_ast_stmt {
+    enum aqls_ast_stmt_kind kind;
     union {
-        AqlsAstStatementWrite* write_statement;
+        struct aqls_ast_stmt_write* write_stmt;
     } as;
 };
 
-struct AqlsAstStatementWrite {
+struct aqls_ast_stmt_write {
     AqlsToken write_token;
     AqlsToken operand;
 };
 
-struct AqlsAstEnd {
+struct aqls_ast_end {
     AqlsToken end_token;
 };
 
-AqlsAst* aqls_ast_new(AqlsAstCompilationUnit* compilation_unit);
-AqlsAstCompilationUnit* aqls_ast_compilation_unit_new(AqlsAstStatementList* statements, AqlsAstEnd* end);
-AqlsAstStatementList* aqls_ast_statements_new(AqlsAstStatement* statement);
-AqlsAstStatementList* aqls_ast_statements_append(AqlsAstStatementList* list, AqlsAstStatement* statement);
-AqlsAstStatement* aqls_ast_statement_write_new(AqlsToken write_token, AqlsToken operand);
-AqlsAstEnd* aqls_ast_end_new(AqlsToken end_token);
+AqlsAst* aqls_ast_new(struct aqls_ast_compilation_unit* compilation_unit);
+struct aqls_ast_compilation_unit* aqls_ast_compilation_unit_new(struct aqls_ast_stmt_list* statements, struct aqls_ast_end* end);
+struct aqls_ast_stmt_list* aqls_ast_statements_new(struct aqls_ast_stmt* statement);
+struct aqls_ast_stmt_list* aqls_ast_statements_append(struct aqls_ast_stmt_list* list, struct aqls_ast_stmt* statement);
+struct aqls_ast_stmt* aqls_ast_statement_write_new(AqlsToken write_token, AqlsToken operand);
+struct aqls_ast_end* aqls_ast_end_new(AqlsToken end_token);
 
 #endif

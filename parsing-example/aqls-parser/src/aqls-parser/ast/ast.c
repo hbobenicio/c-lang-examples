@@ -4,7 +4,7 @@
 
 #include <aqls-parser/utils.h>
 
-AqlsAst* aqls_ast_new(AqlsAstCompilationUnit* compilation_unit)
+AqlsAst* aqls_ast_new(struct aqls_ast_compilation_unit* compilation_unit)
 {
     AqlsAst* ast = ALLOC_OR_PANIC(AqlsAst);
     ast->compilation_unit = compilation_unit;
@@ -12,49 +12,49 @@ AqlsAst* aqls_ast_new(AqlsAstCompilationUnit* compilation_unit)
     return ast;
 }
 
-AqlsAstCompilationUnit* aqls_ast_compilation_unit_new(AqlsAstStatementList* statements, AqlsAstEnd* end)
+struct aqls_ast_compilation_unit* aqls_ast_compilation_unit_new(struct aqls_ast_stmt_list* statements, struct aqls_ast_end* end)
 {
-    AqlsAstCompilationUnit* compilation_unit = ALLOC_OR_PANIC(AqlsAstCompilationUnit);
+    struct aqls_ast_compilation_unit* compilation_unit = ALLOC_OR_PANIC(struct aqls_ast_compilation_unit);
     compilation_unit->statements = statements;
     compilation_unit->end = end;
 
     return compilation_unit;
 }
 
-AqlsAstStatementList* aqls_ast_statements_new(AqlsAstStatement* statement)
+struct aqls_ast_stmt_list* aqls_ast_statements_new(struct aqls_ast_stmt* statement)
 {
-    AqlsAstStatementList* list = ALLOC_OR_PANIC(AqlsAstStatementList);
+    struct aqls_ast_stmt_list* list = ALLOC_OR_PANIC(struct aqls_ast_stmt_list);
     list->statement = statement;
     list->next = NULL;
 
     return list;
 }
 
-AqlsAstStatementList* aqls_ast_statements_append(AqlsAstStatementList* list, AqlsAstStatement* statement)
+struct aqls_ast_stmt_list* aqls_ast_statements_append(struct aqls_ast_stmt_list* list, struct aqls_ast_stmt* statement)
 {
-    AqlsAstStatementList* new_node = aqls_ast_statements_new(statement);
+    struct aqls_ast_stmt_list* new_node = aqls_ast_statements_new(statement);
     if (list != NULL) {
         list->next = new_node;
     }
     return new_node;
 }
 
-AqlsAstStatement* aqls_ast_statement_write_new(AqlsToken write_token, AqlsToken operand)
+struct aqls_ast_stmt* aqls_ast_statement_write_new(AqlsToken write_token, AqlsToken operand)
 {
-    AqlsAstStatementWrite* write_statement = ALLOC_OR_PANIC(AqlsAstStatementWrite);
-    write_statement->write_token = write_token;
-    write_statement->operand = operand;
+    struct aqls_ast_stmt_write* write_stmt = ALLOC_OR_PANIC(struct aqls_ast_stmt_write);
+    write_stmt->write_token = write_token;
+    write_stmt->operand = operand;
     
-    AqlsAstStatement* statement = ALLOC_OR_PANIC(AqlsAstStatement);
+    struct aqls_ast_stmt* statement = ALLOC_OR_PANIC(struct aqls_ast_stmt);
     statement->kind = AQLS_AST_STATEMENT_WRITE;
-    statement->as.write_statement = write_statement;
+    statement->as.write_stmt = write_stmt;
 
     return statement;
 }
 
-AqlsAstEnd* aqls_ast_end_new(AqlsToken end_token)
+struct aqls_ast_end* aqls_ast_end_new(AqlsToken end_token)
 {
-    AqlsAstEnd* end = ALLOC_OR_PANIC(AqlsAstEnd);
+    struct aqls_ast_end* end = ALLOC_OR_PANIC(struct aqls_ast_end);
     end->end_token = end_token;
 
     return end;
