@@ -5,7 +5,7 @@
 
 void aqls_token_queue_init(struct aqls_token_queue* queue, size_t capacity)
 {
-    queue->items = calloc(capacity, sizeof(AqlsToken));
+    queue->items = calloc(capacity, sizeof(struct aqls_token));
     if (queue->items == NULL) {
         fputs("error: aqls: token: queue: out of memory.\n", stderr);
         exit(EXIT_FAILURE);
@@ -19,7 +19,7 @@ void aqls_token_queue_free(struct aqls_token_queue* queue)
     free(queue->items);
 }
 
-void aqls_token_queue_append(struct aqls_token_queue* queue, AqlsToken item)
+void aqls_token_queue_append(struct aqls_token_queue* queue, struct aqls_token item)
 {
     assert(!aqls_token_queue_is_full(queue));
     
@@ -28,18 +28,18 @@ void aqls_token_queue_append(struct aqls_token_queue* queue, AqlsToken item)
     queue->len++;
 }
 
-AqlsToken aqls_token_queue_pop(struct aqls_token_queue* queue)
+struct aqls_token aqls_token_queue_pop(struct aqls_token_queue* queue)
 {
     assert(!aqls_token_queue_is_empty(queue));
 
-    AqlsToken token = queue->items[queue->start];
+    struct aqls_token token = queue->items[queue->start];
     queue->start = (queue->start + 1) % queue->capacity;
     queue->len--;
 
     return token;
 }
 
-AqlsToken aqls_token_queue_peek(const struct aqls_token_queue* queue)
+struct aqls_token aqls_token_queue_peek(const struct aqls_token_queue* queue)
 {
     assert(!aqls_token_queue_is_empty(queue));
 

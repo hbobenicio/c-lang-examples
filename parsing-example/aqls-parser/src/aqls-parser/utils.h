@@ -10,6 +10,6 @@ void* panic_if_null(void* ptr);
 
 char* file_read_or_panic(const char* file_path);
 
-StringView file_read_to_string_view_or_panic(const char* file_path);
+struct strview file_read_to_string_view_or_panic(const char* file_path);
 
 #endif

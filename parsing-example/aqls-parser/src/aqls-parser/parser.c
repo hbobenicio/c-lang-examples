@@ -6,20 +6,20 @@
 
 #include "string-view.h"
 
-static struct aqls_ast_compilation_unit* parse_compilation_unit(AqlsParser* parser);
-static struct aqls_ast_stmt_list* parse_statements(AqlsParser* parser);
-static struct aqls_ast_stmt* parse_statement(AqlsParser* parser);
-static struct aqls_ast_stmt* parse_statement_write(AqlsParser* parser);
-static struct aqls_ast_end* parse_end(AqlsParser* parser);
+static struct aqls_ast_compilation_unit* parse_compilation_unit(struct aqls_parser* parser);
+static struct aqls_ast_stmt_list* parse_statements(struct aqls_parser* parser);
+static struct aqls_ast_stmt* parse_statement(struct aqls_parser* parser);
+static struct aqls_ast_stmt* parse_statement_write(struct aqls_parser* parser);
+static struct aqls_ast_end* parse_end(struct aqls_parser* parser);
 
-static void panic_unexpected_token(AqlsParser* parser, AqlsToken* expected_tokens, size_t expected_tokens_len);
+static void panic_unexpected_token(struct aqls_parser* parser, struct aqls_token* expected_tokens, size_t expected_tokens_len);
 
-void aqls_parser_init(AqlsParser* parser)
+void aqls_parser_init(struct aqls_parser* parser)
 {
     parser->ast = NULL;
 }
 
-void aqls_parser_free(AqlsParser* parser)
+void aqls_parser_free(struct aqls_parser* parser)
 {
     aqls_lexer_free(&parser->lexer);
     // TODO ast is leaking ATM. traverse it and free all the nodes! (with a visitor maybe)
@@ -28,7 +28,7 @@ void aqls_parser_free(AqlsParser* parser)
 /**
  * <Ast> := <CompilationUnit> EOF
  */
-int aqls_parser_parse(AqlsParser* parser, const char* input, size_t input_len)
+int aqls_parser_parse(struct aqls_parser* parser, const char* input, size_t input_len)
 {
     aqls_lexer_init(&parser->lexer, input, input_len);
 
@@ -44,7 +44,7 @@ int aqls_parser_parse(AqlsParser* parser, const char* input, size_t input_len)
 /**
  * <CompilationUnit> := <StatementList> <End>
  */
-static struct aqls_ast_compilation_unit* parse_compilation_unit(AqlsParser* parser)
+static struct aqls_ast_compilation_unit* parse_compilation_unit(struct aqls_parser* parser)
 {
     struct aqls_ast_stmt_list* statements = parse_statements(parser);
     struct aqls_ast_end* end = parse_end(parser);
@@ -55,7 +55,7 @@ static struct aqls_ast_compilation_unit* parse_compilation_unit(AqlsParser* pars
 /**
  * <StatementList> := <Statement>*
  */
-static struct aqls_ast_stmt_list* parse_statements(AqlsParser* parser)
+static struct aqls_ast_stmt_list* parse_statements(struct aqls_parser* parser)
 {
     struct aqls_ast_stmt_list *statements = NULL, *last = NULL;
     struct aqls_ast_stmt* statement = NULL;
@@ -70,11 +70,11 @@ static struct aqls_ast_stmt_list* parse_statements(AqlsParser* parser)
 /**
  * <Statement> := <StatementWrite> | ... (more yet to come)
  */
-static struct aqls_ast_stmt* parse_statement(AqlsParser* parser)
+static struct aqls_ast_stmt* parse_statement(struct aqls_parser* parser)
 {
     struct aqls_ast_stmt* statement = NULL;
 
-    AqlsToken lookahead = aqls_lexer_peek_token(&parser->lexer);
+    struct aqls_token lookahead = aqls_lexer_peek_token(&parser->lexer);
     if (lookahead.kind == AQLS_TOKEN_ID && string_view_cmp_sized_cstr(lookahead.lexeme, "WRITE", 5) == 0) {
         statement = parse_statement_write(parser);
     }
@@ -85,19 +85,19 @@ static struct aqls_ast_stmt* parse_statement(AqlsParser* parser)
 /**
  * <StatementWrite> := WRITE STRING_LITERAL
  */
-static struct aqls_ast_stmt* parse_statement_write(AqlsParser* parser)
+static struct aqls_ast_stmt* parse_statement_write(struct aqls_parser* parser)
 {
     // can't fail. we've just checked it
     // WRITE
-    AqlsToken write_token = aqls_lexer_next_token(&parser->lexer);
+    struct aqls_token write_token = aqls_lexer_next_token(&parser->lexer);
 
     // STRING_LITERAL
-    AqlsToken operand_token = aqls_lexer_next_token(&parser->lexer);
+    struct aqls_token operand_token = aqls_lexer_next_token(&parser->lexer);
     if (operand_token.kind != AQLS_TOKEN_STRING_LITERAL) {
-        AqlsToken expected_tokens[] = {
+        struct aqls_token expected_tokens[] = {
             aqls_token_string_literal(),
         };
-        panic_unexpected_token(parser, expected_tokens, sizeof(expected_tokens) / sizeof(AqlsToken));
+        panic_unexpected_token(parser, expected_tokens, sizeof(expected_tokens) / sizeof(struct aqls_token));
     }
 
     return aqls_ast_statement_write_new(write_token, operand_token);
@@ -106,20 +106,20 @@ static struct aqls_ast_stmt* parse_statement_write(AqlsParser* parser)
 /**
  * <End> := END
  */
-static struct aqls_ast_end* parse_end(AqlsParser* parser)
+static struct aqls_ast_end* parse_end(struct aqls_parser* parser)
 {
-    AqlsToken end_token = aqls_lexer_next_token(&parser->lexer);
+    struct aqls_token end_token = aqls_lexer_next_token(&parser->lexer);
     if (end_token.kind != AQLS_TOKEN_ID || string_view_cmp_sized_cstr(end_token.lexeme, "END", 3) != 0) {
-        AqlsToken expected_tokens[] = {
+        struct aqls_token expected_tokens[] = {
             aqls_token_id("END"),
         };
-        panic_unexpected_token(parser, expected_tokens, sizeof(expected_tokens) / sizeof(AqlsToken));
+        panic_unexpected_token(parser, expected_tokens, sizeof(expected_tokens) / sizeof(struct aqls_token));
     }
 
     return aqls_ast_end_new(end_token);
 }
 
-static void panic_unexpected_token(AqlsParser* parser, AqlsToken* expected_tokens, size_t expected_tokens_len)
+static void panic_unexpected_token(struct aqls_parser* parser, struct aqls_token* expected_tokens, size_t expected_tokens_len)
 {
     size_t line, column;
     aqls_lexer_get_line_column(&parser->lexer, &line, &column);

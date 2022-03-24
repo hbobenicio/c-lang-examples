@@ -27,12 +27,12 @@ static void test_fixture_minimal(const char* fixtures_path, size_t fixtures_path
     char* fixture_content = file_read_or_panic(fixture_file_path);
     size_t fixture_content_len = strlen(fixture_content);
 
-    AqlsLexer lexer = {0};
+    struct aqls_lexer lexer = {0};
     aqls_lexer_init(&lexer, fixture_content, fixture_content_len);
 
     assert(aqls_lexer_has_more_tokens(&lexer) == true);
 
-    AqlsToken token = {0};
+    struct aqls_token token = {0};
 
     token = aqls_lexer_next_token(&lexer);
     assert(token.kind == AQLS_TOKEN_ID);
@@ -57,12 +57,12 @@ static void test_fixture_hello_world(const char* fixtures_path, size_t fixtures_
     char* fixture_content = file_read_or_panic(fixture_file_path);
     size_t fixture_content_len = strlen(fixture_content);
 
-    AqlsLexer lexer = {0};
+    struct aqls_lexer lexer = {0};
     aqls_lexer_init(&lexer, fixture_content, fixture_content_len);
 
     assert(aqls_lexer_has_more_tokens(&lexer) == true);
 
-    AqlsToken token = {0};
+    struct aqls_token token = {0};
 
     token = aqls_lexer_next_token(&lexer);
     assert(token.kind == AQLS_TOKEN_ID);

@@ -15,11 +15,11 @@
 #define AQLS_LOOKAHEAD 10
 
 static void regex_compile_or_die(regex_t* regex, const char* pattern, int flags);
-static void skip_ignored(AqlsLexer* lexer);
-static void advance(AqlsLexer* lexer, size_t offset);
-static void advance_token(AqlsLexer* lexer, AqlsToken token);
+static void skip_ignored(struct aqls_lexer* lexer);
+static void advance(struct aqls_lexer* lexer, size_t offset);
+static void advance_token(struct aqls_lexer* lexer, struct aqls_token token);
 
-void aqls_lexer_init(AqlsLexer* lexer, const char* input, size_t input_len)
+void aqls_lexer_init(struct aqls_lexer* lexer, const char* input, size_t input_len)
 {
     // input initialization
     lexer->input = input;
@@ -43,12 +43,12 @@ void aqls_lexer_init(AqlsLexer* lexer, const char* input, size_t input_len)
     lexer->patterns[1].token_kind = AQLS_TOKEN_ID;
 }
 
-bool aqls_lexer_has_more_tokens(const AqlsLexer* lexer)
+bool aqls_lexer_has_more_tokens(const struct aqls_lexer* lexer)
 {
     return lexer->pos < lexer->input_len;
 }
 
-AqlsToken aqls_lexer_peek_token(AqlsLexer* lexer)
+struct aqls_token aqls_lexer_peek_token(struct aqls_lexer* lexer)
 {
     // if we have the token already in our lookahead queue, just return it right away
     if (!aqls_token_queue_is_empty(&lexer->lookahead)) {
@@ -56,7 +56,7 @@ AqlsToken aqls_lexer_peek_token(AqlsLexer* lexer)
     }
 
     if (!aqls_lexer_has_more_tokens(lexer)) {
-        AqlsToken eof = aqls_token_eof();
+        struct aqls_token eof = aqls_token_eof();
         aqls_token_queue_append(&lexer->lookahead, eof);
         return eof;
     }
@@ -81,7 +81,7 @@ AqlsToken aqls_lexer_peek_token(AqlsLexer* lexer)
     }
     
     if (pos >= lexer->input_len) {
-        AqlsToken eof = aqls_token_eof();
+        struct aqls_token eof = aqls_token_eof();
         aqls_token_queue_append(&lexer->lookahead, eof);
         return eof;
     }
@@ -96,9 +96,9 @@ AqlsToken aqls_lexer_peek_token(AqlsLexer* lexer)
         int match_len = match.rm_eo - match.rm_so;
         assert(match_len > 0);
 
-        AqlsToken token = {
+        struct aqls_token token = {
             .kind = lexer->patterns[i].token_kind,
-            .lexeme = (StringView) {
+            .lexeme = (struct strview) {
                 .str = cursor,
                 .len = (size_t) match_len,
             },
@@ -109,9 +109,9 @@ AqlsToken aqls_lexer_peek_token(AqlsLexer* lexer)
     }
 
     // TODO should I save the byte position here? should it be in the token?
-    AqlsToken error_token = {
+    struct aqls_token error_token = {
         .kind = AQLS_TOKEN_ERROR,
-        .lexeme = (StringView) {
+        .lexeme = (struct strview) {
             .str = cursor,
             .len = 0,
         },
@@ -120,7 +120,7 @@ AqlsToken aqls_lexer_peek_token(AqlsLexer* lexer)
     return error_token;
 }
 
-size_t aqls_lexer_peek_tokens(AqlsLexer* lexer, size_t n, AqlsToken* tokens)
+size_t aqls_lexer_peek_tokens(struct aqls_lexer* lexer, size_t n, struct aqls_token* tokens)
 {
     (void) lexer;
     (void) n;
@@ -131,10 +131,10 @@ size_t aqls_lexer_peek_tokens(AqlsLexer* lexer, size_t n, AqlsToken* tokens)
     return 0;
 }
 
-AqlsToken aqls_lexer_next_token(AqlsLexer* lexer)
+struct aqls_token aqls_lexer_next_token(struct aqls_lexer* lexer)
 {
     if (!aqls_token_queue_is_empty(&lexer->lookahead)) {
-        AqlsToken token = aqls_token_queue_pop(&lexer->lookahead);
+        struct aqls_token token = aqls_token_queue_pop(&lexer->lookahead);
         if (token.lexeme.str != NULL) {
             size_t offset = 0;
             for (const char* c = lexer->cursor; c != token.lexeme.str; c++) {
@@ -166,9 +166,9 @@ AqlsToken aqls_lexer_next_token(AqlsLexer* lexer)
         int match_len = match.rm_eo - match.rm_so;
         assert(match_len > 0);
 
-        AqlsToken token = {
+        struct aqls_token token = {
             .kind = lexer->patterns[i].token_kind,
-            .lexeme = (StringView) {
+            .lexeme = (struct strview) {
                 .str = lexer->cursor,
                 .len = (size_t) match_len,
             },
@@ -178,9 +178,9 @@ AqlsToken aqls_lexer_next_token(AqlsLexer* lexer)
         return token;
     }
 
-    AqlsToken error_token = {
+    struct aqls_token error_token = {
         .kind = AQLS_TOKEN_ERROR,
-        .lexeme = (StringView) {
+        .lexeme = (struct strview) {
             .str = lexer->cursor,
             .len = 0,
         },
@@ -189,7 +189,7 @@ AqlsToken aqls_lexer_next_token(AqlsLexer* lexer)
     return error_token;
 }
 
-void aqls_lexer_free(AqlsLexer* lexer)
+void aqls_lexer_free(struct aqls_lexer* lexer)
 {
     regfree(&lexer->ignore);
     for (size_t i = 0; i < AQLS_LEXER_PATTERNS_LEN; i++) {
@@ -205,7 +205,7 @@ void aqls_lexer_free(AqlsLexer* lexer)
     aqls_token_queue_free(&lexer->lookahead);
 }
 
-static void skip_ignored(AqlsLexer* lexer)
+static void skip_ignored(struct aqls_lexer* lexer)
 {
     regmatch_t match;
     int rc = regexec(&lexer->ignore, lexer->cursor, 1, &match, REG_NOTEOL);
@@ -218,7 +218,7 @@ static void skip_ignored(AqlsLexer* lexer)
     advance(lexer, (size_t) match_len);
 }
 
-static void advance(AqlsLexer* lexer, size_t offset)
+static void advance(struct aqls_lexer* lexer, size_t offset)
 {
     assert(lexer->pos + offset <= lexer->input_len);
 
@@ -226,7 +226,7 @@ static void advance(AqlsLexer* lexer, size_t offset)
     lexer->cursor += offset;
 }
 
-static void advance_token(AqlsLexer* lexer, AqlsToken token)
+static void advance_token(struct aqls_lexer* lexer, struct aqls_token token)
 {
     assert(lexer->pos + token.lexeme.len <= lexer->input_len);
 
@@ -251,12 +251,12 @@ static void regex_compile_or_die(regex_t* regex, const char* pattern, int flags)
     }
 }
 
-void aqls_lexer_get_line_column(AqlsLexer* lexer, size_t* out_line, size_t* out_column)
+void aqls_lexer_get_line_column(struct aqls_lexer* lexer, size_t* out_line, size_t* out_column)
 {
     aqls_lexer_get_line_column_from_pos(lexer, lexer->pos, out_line, out_column);
 }
 
-void aqls_lexer_get_line_column_from_pos(AqlsLexer* lexer, size_t pos, size_t* out_line, size_t* out_column)
+void aqls_lexer_get_line_column_from_pos(struct aqls_lexer* lexer, size_t pos, size_t* out_line, size_t* out_column)
 {
     *out_line = *out_column = 1;
     for (size_t i = 0; i < pos && i < lexer->input_len; i++) {
@@ -269,7 +269,7 @@ void aqls_lexer_get_line_column_from_pos(AqlsLexer* lexer, size_t pos, size_t* o
     }
 }
 
-void aqls_lexer_get_line_column_from_cursor(AqlsLexer* lexer, const char* cursor, size_t* out_line, size_t* out_column)
+void aqls_lexer_get_line_column_from_cursor(struct aqls_lexer* lexer, const char* cursor, size_t* out_line, size_t* out_column)
 {
     *out_line = *out_column = 1;
     for (const char* c = lexer->input; c < cursor; c++) {

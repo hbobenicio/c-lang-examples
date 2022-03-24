@@ -17,7 +17,7 @@ struct aqls_ast_node* aqls_ast_new_compilation_unit(struct aqls_ast_node* statem
     return node;
 }
 
-struct aqls_ast_node* aqls_ast_new_statement_write(AqlsToken write_token, AqlsToken operand_token) 
+struct aqls_ast_node* aqls_ast_new_statement_write(struct aqls_token write_token, struct aqls_token operand_token) 
 {
     struct aqls_ast_node_stmt_write* write_stmt = ALLOC_OR_PANIC(struct aqls_ast_node_stmt_write);
     write_stmt->write_token = write_token;
@@ -30,7 +30,7 @@ struct aqls_ast_node* aqls_ast_new_statement_write(AqlsToken write_token, AqlsTo
     return node;
 }
 
-struct aqls_ast_node* aqls_ast_new_statenet_end(AqlsToken end_token)
+struct aqls_ast_node* aqls_ast_new_statenet_end(struct aqls_token end_token)
 {
     struct aqls_ast_node_statement_end* end_statement = ALLOC_OR_PANIC(struct aqls_ast_node_statement_end);
     end_statement->end_token = end_token;

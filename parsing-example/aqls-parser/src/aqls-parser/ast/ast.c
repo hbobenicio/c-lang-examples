@@ -4,9 +4,9 @@
 
 #include <aqls-parser/utils.h>
 
-AqlsAst* aqls_ast_new(struct aqls_ast_compilation_unit* compilation_unit)
+struct aqls_ast* aqls_ast_new(struct aqls_ast_compilation_unit* compilation_unit)
 {
-    AqlsAst* ast = ALLOC_OR_PANIC(AqlsAst);
+    struct aqls_ast* ast = ALLOC_OR_PANIC(struct aqls_ast);
     ast->compilation_unit = compilation_unit;
 
     return ast;
@@ -39,7 +39,7 @@ struct aqls_ast_stmt_list* aqls_ast_statements_append(struct aqls_ast_stmt_list*
     return new_node;
 }
 
-struct aqls_ast_stmt* aqls_ast_statement_write_new(AqlsToken write_token, AqlsToken operand)
+struct aqls_ast_stmt* aqls_ast_statement_write_new(struct aqls_token write_token, struct aqls_token operand)
 {
     struct aqls_ast_stmt_write* write_stmt = ALLOC_OR_PANIC(struct aqls_ast_stmt_write);
     write_stmt->write_token = write_token;
@@ -52,7 +52,7 @@ struct aqls_ast_stmt* aqls_ast_statement_write_new(AqlsToken write_token, AqlsTo
     return statement;
 }
 
-struct aqls_ast_end* aqls_ast_end_new(AqlsToken end_token)
+struct aqls_ast_end* aqls_ast_end_new(struct aqls_token end_token)
 {
     struct aqls_ast_end* end = ALLOC_OR_PANIC(struct aqls_ast_end);
     end->end_token = end_token;

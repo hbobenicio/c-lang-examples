@@ -19,12 +19,12 @@ static void test_fixture_minimal(const char* fixtures_path, size_t fixtures_path
     char* fixture_content = file_read_or_panic(fixture_file_path);
     size_t fixture_content_len = strlen(fixture_content);
 
-    AqlsParser parser = {0};
+    struct aqls_parser parser = {0};
     aqls_parser_init(&parser);
 
     assert(aqls_parser_parse(&parser, fixture_content, fixture_content_len) == 0);
 
-    AqlsAst* ast = parser.ast;
+    struct aqls_ast* ast = parser.ast;
     assert(ast != NULL);
 
     aqls_parser_free(&parser);
@@ -42,7 +42,7 @@ static void test_fixture_hello_world(const char* fixtures_path, size_t fixtures_
     char* fixture_content = file_read_or_panic(fixture_file_path);
     size_t fixture_content_len = strlen(fixture_content);
 
-    AqlsParser parser = {0};
+    struct aqls_parser parser = {0};
     aqls_parser_init(&parser);
 
     assert(aqls_parser_parse(&parser, fixture_content, fixture_content_len) == 0);

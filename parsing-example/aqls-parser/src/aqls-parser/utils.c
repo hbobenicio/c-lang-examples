@@ -15,7 +15,7 @@ void* panic_if_null(void* ptr)
     return ptr;
 }
 
-StringView file_read_to_string_view_or_panic(const char* file_path)
+struct strview file_read_to_string_view_or_panic(const char* file_path)
 {
     FILE* file = fopen(file_path, "r");
     if (file == NULL) {
@@ -68,7 +68,7 @@ StringView file_read_to_string_view_or_panic(const char* file_path)
 
     fclose(file);
 
-    return (StringView) {
+    return (struct strview) {
         .str = content,
         .len = content_len,
     };
@@ -76,6 +76,6 @@ StringView file_read_to_string_view_or_panic(const char* file_path)
 
 char* file_read_or_panic(const char* file_path)
 {
-    StringView content = file_read_to_string_view_or_panic(file_path);
+    struct strview content = file_read_to_string_view_or_panic(file_path);
     return (char*) content.str;
 }

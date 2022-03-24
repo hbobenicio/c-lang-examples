@@ -26,7 +26,7 @@ const char* aqls_token_str(enum aqls_token_kind kind)
     }
 }
 
-void aqls_token_fprint(FILE* stream, AqlsToken token)
+void aqls_token_fprint(FILE* stream, struct aqls_token token)
 {
     fprintf(stream, "<%s", aqls_token_str(token.kind));
 
@@ -46,33 +46,33 @@ void aqls_token_fprint(FILE* stream, AqlsToken token)
     fputs("> ", stream);
 }
 
-AqlsToken aqls_token_eof()
+struct aqls_token aqls_token_eof()
 {
-    return (AqlsToken) {
+    return (struct aqls_token) {
         .kind = AQLS_TOKEN_EOF,
         .lexeme = {0},
     };
 }
 
-AqlsToken aqls_token_error()
+struct aqls_token aqls_token_error()
 {
-    return (AqlsToken) {
+    return (struct aqls_token) {
         .kind = AQLS_TOKEN_ERROR,
         .lexeme = {0},
     };
 }
 
-AqlsToken aqls_token_string_literal()
+struct aqls_token aqls_token_string_literal()
 {
-    return (AqlsToken) {
+    return (struct aqls_token) {
         .kind = AQLS_TOKEN_STRING_LITERAL,
         .lexeme = {0},
     };
 }
 
-AqlsToken aqls_token_id(const char* lexeme)
+struct aqls_token aqls_token_id(const char* lexeme)
 {
-    return (AqlsToken) {
+    return (struct aqls_token) {
         .kind = AQLS_TOKEN_ID,
         .lexeme = string_view_from_cstr(lexeme),
     };

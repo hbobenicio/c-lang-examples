@@ -13,18 +13,18 @@ enum aqls_token_kind {
     AQLS_TOKEN_ID,
 };
 
-typedef struct {
+struct aqls_token {
     enum aqls_token_kind kind;
-    StringView lexeme;
-} AqlsToken;
+    struct strview lexeme;
+};
 
 const char* aqls_token_str(enum aqls_token_kind kind);
 
-AqlsToken aqls_token_error();
-AqlsToken aqls_token_eof();
-AqlsToken aqls_token_id(const char* lexeme);
-AqlsToken aqls_token_string_literal();
+struct aqls_token aqls_token_error();
+struct aqls_token aqls_token_eof();
+struct aqls_token aqls_token_id(const char* lexeme);
+struct aqls_token aqls_token_string_literal();
 
-void aqls_token_fprint(FILE* stream, AqlsToken token);
+void aqls_token_fprint(FILE* stream, struct aqls_token token);
 
 #endif

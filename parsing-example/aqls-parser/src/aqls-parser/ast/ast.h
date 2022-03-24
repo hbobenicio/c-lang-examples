@@ -11,14 +11,14 @@
 //        struct aqls_ast_stmt (tagged union)
 //    AqlsEndStatement
 
-typedef struct AqlsAst AqlsAst;
+struct aqls_ast;
 struct aqls_ast_compilation_unit;
 struct aqls_ast_stmt_list;
 struct aqls_ast_stmt;
 struct aqls_ast_stmt_write;
 struct aqls_ast_end;
 
-struct AqlsAst {
+struct aqls_ast {
     struct aqls_ast_compilation_unit* compilation_unit;
 };
 
@@ -44,19 +44,19 @@ struct aqls_ast_stmt {
 };
 
 struct aqls_ast_stmt_write {
-    AqlsToken write_token;
-    AqlsToken operand;
+    struct aqls_token write_token;
+    struct aqls_token operand;
 };
 
 struct aqls_ast_end {
-    AqlsToken end_token;
+    struct aqls_token end_token;
 };
 
-AqlsAst* aqls_ast_new(struct aqls_ast_compilation_unit* compilation_unit);
+struct aqls_ast* aqls_ast_new(struct aqls_ast_compilation_unit* compilation_unit);
 struct aqls_ast_compilation_unit* aqls_ast_compilation_unit_new(struct aqls_ast_stmt_list* statements, struct aqls_ast_end* end);
 struct aqls_ast_stmt_list* aqls_ast_statements_new(struct aqls_ast_stmt* statement);
 struct aqls_ast_stmt_list* aqls_ast_statements_append(struct aqls_ast_stmt_list* list, struct aqls_ast_stmt* statement);
-struct aqls_ast_stmt* aqls_ast_statement_write_new(AqlsToken write_token, AqlsToken operand);
-struct aqls_ast_end* aqls_ast_end_new(AqlsToken end_token);
+struct aqls_ast_stmt* aqls_ast_statement_write_new(struct aqls_token write_token, struct aqls_token operand);
+struct aqls_ast_end* aqls_ast_end_new(struct aqls_token end_token);
 
 #endif
