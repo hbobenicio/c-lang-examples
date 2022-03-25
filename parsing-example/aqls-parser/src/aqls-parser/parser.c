@@ -14,9 +14,10 @@ static struct aqls_ast_end* parse_end(struct aqls_parser* parser);
 
 static void panic_unexpected_token(struct aqls_parser* parser, struct aqls_token* expected_tokens, size_t expected_tokens_len);
 
-void aqls_parser_init(struct aqls_parser* parser)
+void aqls_parser_init(struct aqls_parser* parser, struct strview input_file_path)
 {
     parser->ast = NULL;
+    parser->input_file_path = input_file_path;
 }
 
 void aqls_parser_free(struct aqls_parser* parser)

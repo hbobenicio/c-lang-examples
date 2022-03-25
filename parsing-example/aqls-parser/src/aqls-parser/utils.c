@@ -68,6 +68,7 @@ struct strview file_read_to_string_view_or_panic(const char* file_path)
 
     fclose(file);
 
+    //FIXME should not use strview for non-const data
     return (struct strview) {
         .str = content,
         .len = content_len,
@@ -77,5 +78,6 @@ struct strview file_read_to_string_view_or_panic(const char* file_path)
 char* file_read_or_panic(const char* file_path)
 {
     struct strview content = file_read_to_string_view_or_panic(file_path);
+    //FIXME this is really wrong...
     return (char*) content.str;
 }
