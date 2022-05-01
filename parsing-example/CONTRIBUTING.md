@@ -19,7 +19,7 @@ pip install -U pip
 pip install -r dev-requirements.txt
 
 # with meson installed now, setup the build directory
-meson setup builddir
+meson setup builddir # meson <other options> -Db_sanitize=address
 ```
 
 ## Building
