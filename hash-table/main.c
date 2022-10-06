@@ -12,24 +12,30 @@
 #include <assert.h>
 #include <math.h>
 
-#define EXIT_IF_TRUE(condition, msg) \
+#define EXIT_IF(condition, msg) \
     do { \
         if (condition) { \
-            perror("error: fatal: " msg); \
+            perror("error: " msg); \
             exit(EXIT_FAILURE); \
         } \
     } while(0)
 
-// API can be improved if this could be defined by the user
+#define HASH_TABLE_VALUE_TYPE int
+
+// NOTE API can be improved if this could be defined by the user
 struct hash_table_entry {
     /**
      * @brief The entry key. NULL is not a valid entry, because we'll use it as a flag to detect unused entries.
-     * 
      */
     char* key;
-    int value;
+
+    //NOTE API can be improved if this could be defined by the user
+    HASH_TABLE_VALUE_TYPE value;
 };
 
+/**
+ * @brief The Hash Table data structure.
+ */
 struct hash_table {
     /**
      * @brief The table of entries itself. It's just a dynamic array of entries.
@@ -58,7 +64,7 @@ uint32_t hash_fnv_1a_32(const char* key, size_t key_len);
 void hash_table_init(struct hash_table* ht, size_t size)
 {
     ht->entries = calloc(size, sizeof(struct hash_table_entry));
-    EXIT_IF_TRUE(ht->entries == NULL, "failed to allocate memory for hash table");
+    EXIT_IF(ht->entries == NULL, "failed to allocate memory for hash table");
 
     ht->capacity = size;
     ht->count = 0;
@@ -71,7 +77,8 @@ void hash_table_free(struct hash_table* ht)
     }
     free(ht->entries);
     ht->entries = NULL;
-    ht->capacity = ht->count = 0;
+    ht->capacity = 0;
+    ht->count = 0;
 }
 
 /**
@@ -107,6 +114,7 @@ void hash_table_put(struct hash_table* ht, const char* key, int value)
 {
     assert(key != NULL && "NULL keys not allowed here because we use it to check if entry is empty");
 
+    //TODO this can be avoided if informed by the user
     size_t key_len = strlen(key);
     size_t index = hash_fnv_1a_32(key, key_len) % ht->capacity;
 
