@@ -8,6 +8,7 @@
 
 int main(int argc, const char** argv)
 {
+    //TODO is here the better place put this?
     srand(time(NULL));
 
     if (argc != 2) {
@@ -23,4 +24,5 @@ int main(int argc, const char** argv)
     machine_load_rom(&machine, rom_file_path);
     machine_disassemble(&machine, stdout);
     // machine_run(&machine);
+    machine_free(&machine);
 }

@@ -14,7 +14,7 @@ struct buffer file_read_contents(const char* file_path)
     }
 
     assert(fseek(file, 0, SEEK_END) != -1);
-    long file_size = ftell(file);
+    size_t file_size = (size_t) ftell(file);
     assert(file_size > 0);
     rewind(file);
 

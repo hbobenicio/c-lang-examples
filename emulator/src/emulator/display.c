@@ -10,7 +10,19 @@ void display_init(struct display* d)
 {
     init_sdl();
     
-    memset(d->buffer, 0, DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(d->buffer[0]));
+    // can't do it with memset, right?
+    // memset(d->buffer, 0, DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(d->buffer[0]));
+    for (size_t i = 0; i < DISPLAY_WIDTH; i++) {
+        for (size_t j = 0; j < DISPLAY_HEIGHT; j++) {
+            d->buffer[i][j] = 0;
+        }
+    }
+}
+
+void display_free(struct display* d)
+{
+    (void) d;
+    SDL_Quit();
 }
 
 static void init_sdl(void)

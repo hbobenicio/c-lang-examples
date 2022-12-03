@@ -299,12 +299,12 @@ static void disassemble_reg_dump(struct disassembler* d, OpCode opcode)
 {
     Register x = opcode_decode_register_x(opcode);
 
-    fprintf(d->file, "reg_dump(" REGISTER_FMT ", &I)", x);
+    fprintf(d->file, "reg_dump(" REGISTER_FMT ", &I)\n", x);
 }
 
 static void disassemble_reg_load(struct disassembler* d, OpCode opcode)
 {
     Register x = opcode_decode_register_x(opcode);
 
-    fprintf(d->file, "reg_load(" REGISTER_FMT ", &I)", x);
+    fprintf(d->file, "reg_load(" REGISTER_FMT ", &I)\n", x);
 }

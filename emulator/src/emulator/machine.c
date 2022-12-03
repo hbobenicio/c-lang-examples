@@ -65,6 +65,11 @@ void machine_init(struct machine* m)
     m->i = MEMORY_PROGRAM_STARTING_ADDRESS;
 }
 
+void machine_free(struct machine* m)
+{
+    display_free(&m->display);
+}
+
 void machine_load_rom(struct machine* m, const char* rom_file_path)
 {
     struct buffer rom = file_read_contents(rom_file_path);
@@ -174,12 +179,14 @@ static void machine_run_step(struct machine* m)
 
 static void run_display_clear(struct machine* m, OpCode opcode)
 {
+    (void) m;
     (void) opcode;
     UNIMPLEMENTED();
 }
 
 static void run_return(struct machine* m, OpCode opcode)
 {
+    (void) m;
     (void) opcode;
     // fprintf(stream, "Return from a subroutine\n");
     UNIMPLEMENTED();
@@ -187,7 +194,9 @@ static void run_return(struct machine* m, OpCode opcode)
 
 static void run_call(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Address address = opcode_decode_address(opcode);
+    (void) address;
 
     // fprintf(stream, "Call machine code at address " ADDRESS_FMT "\n", address);
     UNIMPLEMENTED();
@@ -195,7 +204,9 @@ static void run_call(struct machine* m, OpCode opcode)
 
 static void run_goto(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Address address = opcode_decode_address(opcode);
+    (void) address;
 
     // fprintf(stream, "goto " ADDRESS_FMT "\n", address);
     UNIMPLEMENTED();
@@ -203,7 +214,9 @@ static void run_goto(struct machine* m, OpCode opcode)
 
 static void run_call_subroutine(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Address address = opcode_decode_address(opcode);
+    (void) address;
 
     // fprintf(stream, "Call subroutine at address " ADDRESS_FMT "\n", address);
     UNIMPLEMENTED();
@@ -211,8 +224,11 @@ static void run_call_subroutine(struct machine* m, OpCode opcode)
 
 static void run_if_equals(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
+    (void) x;
+    (void) value;
 
     // fprintf(stream, "if (" REGISTER_FMT " == " CONST_FMT ")\n", x, value);
     UNIMPLEMENTED();
@@ -220,8 +236,11 @@ static void run_if_equals(struct machine* m, OpCode opcode)
 
 static void run_if_not_equals(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
+    (void) x;
+    (void) value;
 
     // fprintf(stream, "if (" REGISTER_FMT " != " CONST_FMT ")\n", x, value);
     UNIMPLEMENTED();
@@ -323,8 +342,11 @@ static void run_set_i_register(struct machine* m, OpCode opcode)
 
 static void run_set_vx_rand_and(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
+    (void) x;
+    (void) value;
 
     // fprintf(stream, REGISTER_FMT " = rand() & " CONST_FMT "\n", x, value);
     UNIMPLEMENTED();
@@ -332,9 +354,13 @@ static void run_set_vx_rand_and(struct machine* m, OpCode opcode)
 
 static void run_display_draw_sprite_at(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
     Register y = opcode_decode_register_y(opcode);
     Const value = opcode_decode_const_4bit(opcode);
+    (void) x;
+    (void) y;
+    (void) value;
 
     // fprintf(stream, "draw(" REGISTER_FMT ", " REGISTER_FMT ", " CONST_FMT ")\n", x, y, value);
     UNIMPLEMENTED();
@@ -342,7 +368,9 @@ static void run_display_draw_sprite_at(struct machine* m, OpCode opcode)
 
 static void run_if_key_equals_to_vx(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, "if (key() == " REGISTER_FMT ")\n", x);
     UNIMPLEMENTED();
@@ -350,7 +378,9 @@ static void run_if_key_equals_to_vx(struct machine* m, OpCode opcode)
 
 static void run_if_key_not_equals_to_vx(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, "if (key() != " REGISTER_FMT ")\n", x);
     UNIMPLEMENTED();
@@ -358,7 +388,9 @@ static void run_if_key_not_equals_to_vx(struct machine* m, OpCode opcode)
 
 static void run_set_vx_from_delay_timer(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, REGISTER_FMT " = get_delay()\n", x);
     UNIMPLEMENTED();
@@ -366,7 +398,9 @@ static void run_set_vx_from_delay_timer(struct machine* m, OpCode opcode)
 
 static void run_set_vx_from_key(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, REGISTER_FMT " = get_key()\n", x);
     UNIMPLEMENTED();
@@ -374,7 +408,9 @@ static void run_set_vx_from_key(struct machine* m, OpCode opcode)
 
 static void run_set_delay_timer_from_vx(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, "delay_timer(" REGISTER_FMT ")\n", x);
     UNIMPLEMENTED();
@@ -382,41 +418,56 @@ static void run_set_delay_timer_from_vx(struct machine* m, OpCode opcode)
 
 static void run_set_sound_timer(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, "sound_timer(" REGISTER_FMT ")\n", x);
     UNIMPLEMENTED();
 }
+
 static void run_add_vx_to_i(struct machine* m, OpCode opcode)
 {
     Register x = opcode_decode_register_x(opcode);
 
     m->i += m->registers[x];
 }
+
 static void run_set_i_to_sprite_addr(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, "I = sprite_addr[" REGISTER_FMT "]\n", x);
     UNIMPLEMENTED();
 }
+
 static void run_set_bcd(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, "set_bcd(" REGISTER_FMT ")\n", x);
     UNIMPLEMENTED();
 }
+
 static void run_reg_dump(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, "reg_dump(" REGISTER_FMT ", &I)", x);
     UNIMPLEMENTED();
 }
+
 static void run_reg_load(struct machine* m, OpCode opcode)
 {
+    (void) m;
     Register x = opcode_decode_register_x(opcode);
+    (void) x;
 
     // fprintf(stream, "reg_load(" REGISTER_FMT ", &I)", x);
     UNIMPLEMENTED();

@@ -10,3 +10,4 @@ struct display {
 };
 
 void display_init(struct display* d);
+void display_free(struct display* d);
