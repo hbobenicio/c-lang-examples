@@ -1,14 +1,15 @@
 #include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
 
 #include "machine.h"
 #include "opcode.h"
-
-#include <stdio.h>
-#include <stdlib.h>
 #include "utils/fs.h"
 
 int main(int argc, const char** argv)
 {
+    srand(time(NULL));
+
     if (argc != 2) {
         fprintf(stderr, "error: ROM_PATH argument not specified\n");
         printf("Usage: emulator <ROM_PATH>\n");

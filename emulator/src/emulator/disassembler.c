@@ -126,7 +126,7 @@ static void disassemble_set_register(struct disassembler* d, OpCode opcode)
     Register reg = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
 
-    fprintf(d->file, REGISTER_FMT" = " CONST_FMT "\n", reg, value);
+    fprintf(d->file, REGISTER_FMT " = " CONST_FMT "\n", reg, value);
 }
 
 static void disassemble_add_to_vx(struct disassembler* d, OpCode opcode)
@@ -134,7 +134,7 @@ static void disassemble_add_to_vx(struct disassembler* d, OpCode opcode)
     Register reg = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
 
-    fprintf(d->file, REGISTER_FMT" += " CONST_FMT "\n", reg, value);
+    fprintf(d->file, REGISTER_FMT " += " CONST_FMT "\n", reg, value);
 }
 
 static void disassemble_set_vx_from_vy(struct disassembler* d, OpCode opcode)

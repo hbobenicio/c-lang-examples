@@ -5,9 +5,15 @@
 
 #include "memory.h"
 #include "register.h"
+#include "display.h"
 
 struct machine {
     uint8_t memory[MEMORY_SIZE];
+
+    struct display display;
+
+    //TODO Create CPU data structure and move registers and computation to there
+
     uint8_t registers[REGISTER_COUNT];
     /**
      * @brief The Program Counter register used to hold the next program instruction to be executed

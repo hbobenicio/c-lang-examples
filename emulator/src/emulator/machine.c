@@ -57,6 +57,8 @@ static void run_reg_load(struct machine* m, OpCode opcode);
 
 void machine_init(struct machine* m)
 {
+    display_init(&m->display);
+    
     memset(m->memory, 0, sizeof(m->memory));
     memset(m->registers, 0, sizeof(m->registers));
     m->pc = MEMORY_PROGRAM_STARTING_ADDRESS;
