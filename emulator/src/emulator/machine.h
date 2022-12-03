@@ -10,9 +10,9 @@ struct machine {
     uint8_t memory[MEMORY_SIZE];
     uint8_t registers[REGISTER_COUNT];
     /**
-     * @brief The program counter
+     * @brief The Program Counter register used to hold the next program instruction to be executed
      */
-    uint16_t pc;
+    Address pc;
     /**
      * @brief 16-bit register used to hold memory address values
      */
@@ -24,3 +24,4 @@ void machine_init(struct machine* m);
 
 void machine_load_rom(struct machine* m, const char* rom_file_path);
 void machine_disassemble(struct machine* m, FILE* stream);
+void machine_run(struct machine* m);

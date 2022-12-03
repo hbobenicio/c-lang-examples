@@ -1,17 +1,6 @@
 #include "opcode.h"
 
 #include <stdbool.h>
-#include "memory.h"
-#include "register.h"
-
-typedef uint8_t Const;
-#define CONST_FMT "0x%X"
-
-static Address opcode_decode_address(OpCode opcode);
-static Register opcode_decode_register_x(OpCode opcode);
-static Register opcode_decode_register_y(OpCode opcode);
-static Const opcode_decode_const_8bit(OpCode opcode);
-static Const opcode_decode_const_4bit(OpCode opcode);
 
 static void opcode_disassemble_display_clear(OpCode opcode, FILE* stream);
 static void opcode_disassemble_return(OpCode opcode, FILE* stream);
@@ -325,27 +314,27 @@ static void opcode_disassemble_reg_load(OpCode opcode, FILE* stream)
     fprintf(stream, "reg_load(" REGISTER_FMT ", &I)", x);
 }
 
-static Address opcode_decode_address(OpCode opcode)
+Address opcode_decode_address(OpCode opcode)
 {
     return opcode & 0x0FFF;
 }
 
-static Register opcode_decode_register_x(OpCode opcode)
+Register opcode_decode_register_x(OpCode opcode)
 {
     return (opcode & 0x0F00) >> (2 * 4);
 }
 
-static Register opcode_decode_register_y(OpCode opcode)
+Register opcode_decode_register_y(OpCode opcode)
 {
     return (opcode & 0x00F0) >> (1 * 4);
 }
 
-static Const opcode_decode_const_8bit(OpCode opcode)
+Const opcode_decode_const_8bit(OpCode opcode)
 {
     return opcode & 0x00FF;
 }
 
-static Const opcode_decode_const_4bit(OpCode opcode)
+Const opcode_decode_const_4bit(OpCode opcode)
 {
     return opcode & 0x000F;
 }
