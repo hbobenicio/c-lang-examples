@@ -23,5 +23,5 @@ void machine_init(struct machine* m);
 #define machine_reset machine_init
 
 void machine_load_rom(struct machine* m, const char* rom_file_path);
-void machine_disassemble(struct machine* m, FILE* stream);
+void machine_disassemble(struct machine* m, FILE* file);
 void machine_run(struct machine* m);

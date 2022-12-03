@@ -20,6 +20,6 @@ int main(int argc, const char** argv)
     struct machine machine;
     machine_init(&machine);
     machine_load_rom(&machine, rom_file_path);
-    // machine_disassemble(&machine, stdout);
-    machine_run(&machine);
+    machine_disassemble(&machine, stdout);
+    // machine_run(&machine);
 }

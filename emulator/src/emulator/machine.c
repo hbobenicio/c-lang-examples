@@ -8,6 +8,7 @@
 #include "utils/fs.h"
 #include "commons/buffer.h"
 #include "opcode.h"
+#include "disassembler.h"
 
 #define PROGRAM_MAX_SIZE (MEMORY_SIZE - MEMORY_PROGRAM_STARTING_ADDRESS)
 
@@ -16,7 +17,6 @@
         fprintf(stderr, "unimplemented: %s\n", __func__); \
         exit(1); \
     } while (false);
-
 
 static OpCode* machine_first_opcode(struct machine* m);
 static OpCode machine_current_opcode(struct machine* m);
@@ -85,8 +85,12 @@ void machine_load_rom(struct machine* m, const char* rom_file_path)
     buffer_free(&rom);
 }
 
-void machine_disassemble(struct machine* m, FILE* stream)
+void machine_disassemble(struct machine* m, FILE* file)
 {
+    struct disassembler disassembler = {
+        .file = file,
+    };
+
     bool unsupported_opcode_found = false;
     Address opcode_address = MEMORY_PROGRAM_STARTING_ADDRESS;
     for (
@@ -94,8 +98,8 @@ void machine_disassemble(struct machine* m, FILE* stream)
         *opcode != 0 && opcode_address < MEMORY_SIZE;
         opcode++, opcode_address += sizeof(*opcode)
     ) {
-        fprintf(stream, ADDRESS_FMT ": ", opcode_address);
-        if (!opcode_disassemble(*opcode, stream)) {
+        fprintf(file, ADDRESS_FMT ": ", opcode_address);
+        if (!disassembler_disassemble(&disassembler, *opcode)) {
             unsupported_opcode_found = true;
             break;
         }

@@ -1,8 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdio.h>
-#include <stdbool.h>
 
 #include "memory.h"
 #include "register.h"
@@ -12,8 +10,6 @@ typedef uint16_t OpCode;
 
 typedef uint8_t Const;
 #define CONST_FMT "0x%X"
-
-bool opcode_disassemble(OpCode opcode, FILE* stream);
 
 Address opcode_decode_address(OpCode opcode);
 Register opcode_decode_register_x(OpCode opcode);
