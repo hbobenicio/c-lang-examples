@@ -223,22 +223,18 @@ static void run_if_not_equals(struct machine* m, OpCode opcode)
 
 static void run_set_register(struct machine* m, OpCode opcode)
 {
-    Register reg = opcode_decode_register_x(opcode);
+    Register x = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
 
-
-
-    // fprintf(stream, REGISTER_FMT" = " CONST_FMT "\n", reg, value);
-    UNIMPLEMENTED();
+    m->registers[x] = value;
 }
 
 static void run_add_to_vx(struct machine* m, OpCode opcode)
 {
-    Register reg = opcode_decode_register_x(opcode);
+    Register x = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
 
-    // fprintf(stream, REGISTER_FMT" += " CONST_FMT "\n", reg, value);
-    UNIMPLEMENTED();
+    m->registers[x] += value;
 }
 
 static void run_set_vx_from_vy(struct machine* m, OpCode opcode)
@@ -246,8 +242,7 @@ static void run_set_vx_from_vy(struct machine* m, OpCode opcode)
     Register x = opcode_decode_register_x(opcode);
     Register y = opcode_decode_register_y(opcode);
 
-    // fprintf(stream, REGISTER_FMT " = " REGISTER_FMT "\n", x, y);
-    UNIMPLEMENTED();
+    m->registers[x] = m->registers[y];
 }
 
 static void run_set_vx_to_vx_or(struct machine* m, OpCode opcode)
@@ -255,8 +250,7 @@ static void run_set_vx_to_vx_or(struct machine* m, OpCode opcode)
     Register x = opcode_decode_register_x(opcode);
     Register y = opcode_decode_register_y(opcode);
 
-    // fprintf(stream, REGISTER_FMT " |= " REGISTER_FMT "\n", x, y);
-    UNIMPLEMENTED();
+    m->registers[x] |= m->registers[y];
 }
 
 static void run_set_vx_to_vx_and(struct machine* m, OpCode opcode)
@@ -264,8 +258,7 @@ static void run_set_vx_to_vx_and(struct machine* m, OpCode opcode)
     Register x = opcode_decode_register_x(opcode);
     Register y = opcode_decode_register_y(opcode);
 
-    // fprintf(stream, REGISTER_FMT " &= " REGISTER_FMT "\n", x, y);
-    UNIMPLEMENTED();
+    m->registers[x] &= m->registers[y];
 }
 
 static void run_set_vx_to_vx_xor(struct machine* m, OpCode opcode)
@@ -273,8 +266,7 @@ static void run_set_vx_to_vx_xor(struct machine* m, OpCode opcode)
     Register x = opcode_decode_register_x(opcode);
     Register y = opcode_decode_register_y(opcode);
 
-    // fprintf(stream, REGISTER_FMT " ^= " REGISTER_FMT "\n", x, y);
-    UNIMPLEMENTED();
+    m->registers[x] ^= m->registers[y];
 }
 
 static void run_vx_plus_vy(struct machine* m, OpCode opcode)
@@ -282,8 +274,7 @@ static void run_vx_plus_vy(struct machine* m, OpCode opcode)
     Register x = opcode_decode_register_x(opcode);
     Register y = opcode_decode_register_y(opcode);
 
-    // fprintf(stream, REGISTER_FMT " += " REGISTER_FMT "\n", x, y);
-    UNIMPLEMENTED();
+    m->registers[x] += m->registers[y];
 }
 
 static void run_vx_minus_vy(struct machine* m, OpCode opcode)
@@ -291,16 +282,14 @@ static void run_vx_minus_vy(struct machine* m, OpCode opcode)
     Register x = opcode_decode_register_x(opcode);
     Register y = opcode_decode_register_y(opcode);
 
-    // fprintf(stream, REGISTER_FMT " -= " REGISTER_FMT "\n", x, y);
-    UNIMPLEMENTED();
+    m->registers[x] -= m->registers[y];
 }
 
 static void run_set_vx_rshift_one(struct machine* m, OpCode opcode)
 {
     Register x = opcode_decode_register_x(opcode);
 
-    // fprintf(stream, REGISTER_FMT " >>= 1\n", x);
-    UNIMPLEMENTED();
+    m->registers[x] >>= 1;
 }
 
 static void run_set_vx_vy_minus_vx(struct machine* m, OpCode opcode)
@@ -308,16 +297,14 @@ static void run_set_vx_vy_minus_vx(struct machine* m, OpCode opcode)
     Register x = opcode_decode_register_x(opcode);
     Register y = opcode_decode_register_y(opcode);
 
-    // fprintf(stream, REGISTER_FMT " = " REGISTER_FMT " - " REGISTER_FMT "\n", x, y, x);
-    UNIMPLEMENTED();
+    m->registers[x] = m->registers[y] - m->registers[x];
 }
 
 static void run_set_vx_lshift_one(struct machine* m, OpCode opcode)
 {
     Register x = opcode_decode_register_x(opcode);
 
-    // fprintf(stream, REGISTER_FMT " <<= 1\n", x);
-    UNIMPLEMENTED();
+    m->registers[x] <<= 1;
 }
 
 
@@ -325,8 +312,7 @@ static void run_set_i_register(struct machine* m, OpCode opcode)
 {
     Address address = opcode_decode_address(opcode);
 
-    // fprintf(stream, "I = " ADDRESS_FMT "\n", address);
-    UNIMPLEMENTED();
+    m->i = address;
 }
 
 static void run_set_vx_rand_and(struct machine* m, OpCode opcode)
@@ -399,8 +385,7 @@ static void run_add_vx_to_i(struct machine* m, OpCode opcode)
 {
     Register x = opcode_decode_register_x(opcode);
 
-    // fprintf(stream, "I += " REGISTER_FMT "\n", x);
-    UNIMPLEMENTED();
+    m->i += m->registers[x];
 }
 static void run_set_i_to_sprite_addr(struct machine* m, OpCode opcode)
 {
