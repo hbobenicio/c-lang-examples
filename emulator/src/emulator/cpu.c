@@ -6,8 +6,12 @@
 #include <string.h>
 #include <assert.h>
 
+#include "utils/random.h"
 #include "memory.h"
 #include "opcode.h"
+#include "disassembler.h"
+#include "display.h"
+#include "keyboard.h"
 
 #define UNIMPLEMENTED() \
     do { \
@@ -17,7 +21,9 @@
 
 static OpCode fetch_opcode(struct cpu* cpu);
 static void cpu_pc_advance(struct cpu* cpu);
-static void cpu_stack_push_address(struct cpu* cpu, Address address);
+static void cpu_goto_address(struct cpu* cpu, Address address);
+static void cpu_stack_push(struct cpu* cpu, Address address);
+static Address cpu_stack_pop(struct cpu* cpu);
 /**
  * @brief Decodes and executes the given Opcode
  * @param cpu 
@@ -58,9 +64,11 @@ static void exec_set_bcd(struct cpu* cpu, OpCode opcode);
 static void exec_reg_dump(struct cpu* cpu, OpCode opcode);
 static void exec_reg_load(struct cpu* cpu, OpCode opcode);
 
-void cpu_init(struct cpu* cpu, uint8_t* memory)
+void cpu_init(struct cpu* cpu, uint8_t* memory, struct display* display)
 {
     cpu->memory = memory;
+    cpu->display = display;
+
     memset(cpu->registers, 0, sizeof(cpu->registers));
     memset(cpu->stack, 0, sizeof(cpu->stack));
     cpu->pc = MEMORY_PROGRAM_STARTING_ADDRESS;
@@ -70,9 +78,12 @@ void cpu_init(struct cpu* cpu, uint8_t* memory)
 
 void cpu_run(struct cpu* cpu)
 {
-    assert(cpu->pc == MEMORY_PROGRAM_STARTING_ADDRESS);
+    // assert(cpu->pc == MEMORY_PROGRAM_STARTING_ADDRESS);
 
-    while (true) {
+    //NOTE this is just temporarely until we find a better way to debug execution...
+    struct disassembler disassembler = { .file = stderr };
+
+    // while (true) {
         if (cpu->pc >= MEMORY_SIZE) {
             fprintf(stderr, "error: program counter (PC) overflow\n");
             exit(1);
@@ -84,9 +95,11 @@ void cpu_run(struct cpu* cpu)
 
         cpu_pc_advance(cpu);
 
+        disassembler_disassemble(&disassembler, opcode);
+
         // Decode and Execute
         cpu_decode_and_exec_opcode(cpu, opcode);
-    }
+    // }
 }
 
 static void cpu_decode_and_exec_opcode(struct cpu* cpu, OpCode opcode)
@@ -137,28 +150,43 @@ static void cpu_pc_advance(struct cpu* cpu)
     cpu->pc += sizeof(OpCode);
 }
 
-static void cpu_stack_push_address(struct cpu* cpu, Address address)
+static void cpu_goto_address(struct cpu* cpu, Address address)
+{
+    cpu->pc = address;
+}
+
+static void cpu_stack_push(struct cpu* cpu, Address address)
 {
     if (cpu->stack_count >= STACK_CAPACITY) {
         fprintf(stderr, "error: cpu: runtime: stack overflow\n");
         exit(1);
     }
-    cpu->stack[cpu->stack_count++] = address;
+    cpu->stack[cpu->stack_count] = address;
+    cpu->stack_count++;
+}
+
+static Address cpu_stack_pop(struct cpu* cpu)
+{
+    if (cpu->stack_count == 0) {
+        fprintf(stderr, "error: cpu: runtime: stack underflow\n");
+        exit(1);
+    }
+    cpu->stack_count--;
+    return cpu->stack[cpu->stack_count];
 }
 
 static void exec_display_clear(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
     (void) opcode;
-    UNIMPLEMENTED();
+    display_clear(cpu->display);
 }
 
 static void exec_return(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
     (void) opcode;
-    // fprintf(stream, "Return from a subroutine\n");
-    UNIMPLEMENTED();
+
+    Address returning_address = cpu_stack_pop(cpu);
+    cpu_goto_address(cpu, returning_address);
 }
 
 static void exec_call(struct cpu* cpu, OpCode opcode)
@@ -174,47 +202,34 @@ static void exec_call(struct cpu* cpu, OpCode opcode)
 static void exec_goto(struct cpu* cpu, OpCode opcode)
 {
     Address address = opcode_decode_address(opcode);
-
-    // fprintf(stream, "goto " ADDRESS_FMT "\n", address);
-    cpu->pc = address;
+    cpu_goto_address(cpu, address);
 }
 
 static void exec_call_subroutine(struct cpu* cpu, OpCode opcode)
 {
     Address address = opcode_decode_address(opcode);
-    fprintf(stderr, "trace: cpu: calling subroutine at address " ADDRESS_FMT "\n", address);
-
-    // fprintf(stream, "Call subroutine at address " ADDRESS_FMT "\n", address);
-    Address returning_address = cpu->pc;
-    cpu_stack_push_address(cpu, returning_address);
-    //TODO Should I store registers in the stack too? I dont know...
-
-    // GOTO
-    cpu->pc = address;
+    cpu_stack_push(cpu, cpu->pc);
+    cpu_goto_address(cpu, address);
 }
 
 static void exec_if_equals(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
     Register x = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
-    (void) x;
-    (void) value;
 
-    // fprintf(stream, "if (" REGISTER_FMT " == " CONST_FMT ")\n", x, value);
-    UNIMPLEMENTED();
+    if (cpu->registers[x] == value) {
+        cpu_pc_advance(cpu);
+    }
 }
 
 static void exec_if_not_equals(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
     Register x = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
-    (void) x;
-    (void) value;
 
-    // fprintf(stream, "if (" REGISTER_FMT " != " CONST_FMT ")\n", x, value);
-    UNIMPLEMENTED();
+    if (cpu->registers[x] != value) {
+        cpu_pc_advance(cpu);
+    }
 }
 
 static void exec_set_register(struct cpu* cpu, OpCode opcode)
@@ -313,14 +328,10 @@ static void exec_set_i_register(struct cpu* cpu, OpCode opcode)
 
 static void exec_set_vx_rand_and(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
     Register x = opcode_decode_register_x(opcode);
     Const value = opcode_decode_const_8bit(opcode);
-    (void) x;
-    (void) value;
-
-    // fprintf(stream, REGISTER_FMT " = rand() & " CONST_FMT "\n", x, value);
-    UNIMPLEMENTED();
+    
+    cpu->registers[x] = random_u8() & value;
 }
 
 static void exec_display_draw_sprite_at(struct cpu* cpu, OpCode opcode)
@@ -339,22 +350,20 @@ static void exec_display_draw_sprite_at(struct cpu* cpu, OpCode opcode)
 
 static void exec_if_key_equals_to_vx(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
     Register x = opcode_decode_register_x(opcode);
-    (void) x;
 
-    // fprintf(stream, "if (key() == " REGISTER_FMT ")\n", x);
-    UNIMPLEMENTED();
+    if (keyboard_is_key_pressed(cpu->registers[x])) {
+        cpu_pc_advance(cpu);
+    }
 }
 
 static void exec_if_key_not_equals_to_vx(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
     Register x = opcode_decode_register_x(opcode);
-    (void) x;
 
-    // fprintf(stream, "if (key() != " REGISTER_FMT ")\n", x);
-    UNIMPLEMENTED();
+    if (!keyboard_is_key_pressed(cpu->registers[x])) {
+        cpu_pc_advance(cpu);
+    }
 }
 
 static void exec_set_vx_from_delay_timer(struct cpu* cpu, OpCode opcode)

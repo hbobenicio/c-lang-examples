@@ -7,6 +7,8 @@
 
 #include <arpa/inet.h>
 
+#include <SDL2/SDL.h>
+
 #include "utils/fs.h"
 #include "commons/buffer.h"
 #include "opcode.h"
@@ -19,8 +21,8 @@ static OpCode* machine_first_opcode(struct machine* m);
 void machine_init(struct machine* m)
 {
     memory_init(m->memory);
-    cpu_init(&m->cpu, m->memory);
     display_init(&m->display);
+    cpu_init(&m->cpu, m->memory, &m->display);
 }
 
 void machine_free(struct machine* m)
@@ -39,6 +41,8 @@ void machine_load_rom(struct machine* m, const char* rom_file_path)
     memcpy(&m->memory[MEMORY_PROGRAM_STARTING_ADDRESS], rom.data, rom.capacity);
 
     // swap bytes order from big-endian to little-endian
+    // TODO changing the byte order of all instructions... what happens with address/const values
+    //      encoded inside these? for uint8_t, no problem.. but addresses do. are those addresses 0x200 shifted and in which byte order?
     for (
         OpCode *opcode = machine_first_opcode(m);
         *opcode != 0 && ((uint8_t*)opcode) < (&m->memory[MEMORY_PROGRAM_STARTING_ADDRESS]) + PROGRAM_MAX_SIZE;
@@ -80,7 +84,40 @@ void machine_disassemble(struct machine* m, FILE* file)
 
 void machine_run(struct machine* m)
 {
-    cpu_run(&m->cpu);
+    //TODO we have the SDL event loop and the CPU execution Loop... How to deal with them?
+    // cpu_run(&m->cpu);
+    while (true) {
+        //TODO fps control?
+        {
+            SDL_Event event;
+            while (SDL_PollEvent(&event)) {
+                switch (event.type) {
+                    case SDL_QUIT:
+                        goto loop_exit;
+
+                    case SDL_KEYDOWN: {
+                        if (event.key.keysym.sym == SDLK_ESCAPE) {
+                            goto loop_exit;
+                        }
+                    } break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+        
+        // Update
+        //TODO run step?
+        cpu_run(&m->cpu);
+
+        // Render
+        display_render(&m->display);
+
+        //TODO fps control?
+    }
+loop_exit:
+    fprintf(stderr, "info: machine: finishing emulation...");
 }
 
 static OpCode* machine_first_opcode(struct machine* m)
