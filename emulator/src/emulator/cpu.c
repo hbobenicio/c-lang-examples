@@ -191,12 +191,11 @@ static void exec_return(struct cpu* cpu, OpCode opcode)
 
 static void exec_call(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
+    fprintf(stderr, "warn: cpu: obsolete instruction NATIVE CALL\n");
     Address address = opcode_decode_address(opcode);
-    (void) address;
-
-    // fprintf(stream, "Call machine code at address " ADDRESS_FMT "\n", address);
-    UNIMPLEMENTED();
+    
+    cpu_stack_push(cpu, cpu->pc);
+    cpu_goto_address(cpu, address);
 }
 
 static void exec_goto(struct cpu* cpu, OpCode opcode)
@@ -435,20 +434,20 @@ static void exec_set_bcd(struct cpu* cpu, OpCode opcode)
 
 static void exec_reg_dump(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
     Register x = opcode_decode_register_x(opcode);
-    (void) x;
 
-    // fprintf(stream, "reg_dump(" REGISTER_FMT ", &I)", x);
-    UNIMPLEMENTED();
+    Address addr = cpu->i;
+    for (Register i = 0; i <= x; i++, addr++) {
+        cpu->memory[addr] = cpu->registers[i];
+    }
 }
 
 static void exec_reg_load(struct cpu* cpu, OpCode opcode)
 {
-    (void) cpu;
     Register x = opcode_decode_register_x(opcode);
-    (void) x;
 
-    // fprintf(stream, "reg_load(" REGISTER_FMT ", &I)", x);
-    UNIMPLEMENTED();
+    Address addr = cpu->i;
+    for (Register i = 0; i <= x; i++, addr++) {
+        cpu->registers[i] = cpu->memory[addr];
+    }
 }
