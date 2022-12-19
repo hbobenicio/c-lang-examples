@@ -3,6 +3,15 @@
 #include <string.h>
 #include <assert.h>
 
+// The font sprite size in bytes
+#define FONT_SPRITE_SIZE 5
+
+// The starting memory address where the fonts will be loaded
+#define FONT_MEM_ADDRESS 0x0000
+
+// The total number of sprites
+#define FONT_COUNT 16
+
 static void load_font_sprites(uint8_t* mem);
 
 void memory_init(uint8_t* mem)
@@ -32,7 +41,12 @@ static void load_font_sprites(uint8_t* mem)
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80, // F
     };
-    assert(sizeof(font_sprites) == 16 * 5);
+    assert(sizeof(font_sprites) == FONT_COUNT * FONT_SPRITE_SIZE);
 
-    memcpy(mem, font_sprites, sizeof(font_sprites));
+    memcpy(mem + FONT_MEM_ADDRESS, font_sprites, sizeof(font_sprites));
+}
+
+Address memory_address_from_sprite_value(uint8_t sprite_value)
+{
+    return FONT_MEM_ADDRESS + (sprite_value * FONT_SPRITE_SIZE);
 }

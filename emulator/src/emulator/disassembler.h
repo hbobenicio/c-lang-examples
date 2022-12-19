@@ -9,4 +9,4 @@ struct disassembler {
     FILE* file;
 };
 
-bool disassembler_disassemble(struct disassembler* d, OpCode opcode);
+bool disassembler_disassemble(struct disassembler* d, Word opcode);

@@ -12,4 +12,6 @@ A chip-8 machine emulator.
 - https://en.wikipedia.org/wiki/Program_counter
 - https://www.emulator101.com
 - http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.4
-
+- https://rawgit.com/alexanderdickson/Chip-8-Emulator/master/index.html
+- https://github.com/ericwoude/CHIP-8-disassembler
+  

@@ -7,6 +7,7 @@
 #include "register.h"
 #include "cpu.h"
 #include "display.h"
+#include "timer.h"
 
 #define STACK_CAPACITY 12
 
@@ -14,6 +15,8 @@ struct machine {
     uint8_t memory[MEMORY_SIZE];
     struct cpu cpu;
     struct display display;
+    struct timer delay_timer;
+    struct timer sound_timer;
 };
 
 void machine_init(struct machine* m);

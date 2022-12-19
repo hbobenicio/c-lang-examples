@@ -9,11 +9,14 @@
 #define STACK_CAPACITY 12
 
 struct display;
+struct timer;
 
 struct cpu {
     //NOTE until we check if it's worth implementing bus and/or a memory data structure, we have this...
     uint8_t* memory;
     struct display* display;
+    struct timer* delay_timer;
+    struct timer* sound_timer;
 
     /**
      * @brief General Purpose Registers (GPR's). The spec calls this 'V' (V0 to VF)
@@ -34,5 +37,9 @@ struct cpu {
     size_t stack_count;
 };
 
-void cpu_init(struct cpu* cpu, uint8_t* memory, struct display* display);
-void cpu_run(struct cpu* cpu);
+void cpu_init(struct cpu* cpu, uint8_t* memory, struct display* display, struct timer* delay_timer, struct timer* sound_timer);
+
+/**
+ * @brief Executes a single instruction.
+ */
+void cpu_step(struct cpu* cpu);
