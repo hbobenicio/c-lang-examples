@@ -28,3 +28,4 @@ typedef uint8_t Register;
 static_assert(REGISTER_COUNT <= UINT8_MAX, "Register type must be big enough to represent all possible register values");
 
 #define REGISTER_FMT "V%hu"
+#define REGISTER_MAX UINT8_MAX

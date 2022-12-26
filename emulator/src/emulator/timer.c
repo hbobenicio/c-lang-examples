@@ -2,6 +2,10 @@
 
 #include <SDL2/SDL_timer.h>
 
+#include "logging/logger.h"
+
+#define LOG_TAG "timer"
+
 #define CLOCK_FREQUENCY_HZ 60
 #define CLOCK_TIMEUP_DURATION_MS (1 * 1000 / CLOCK_FREQUENCY_HZ)
 
@@ -33,9 +37,14 @@ void timer_update(struct timer* t)
     // time's up! should tick
 
     uint64_t ticks_count = elapsed_time_ms / CLOCK_TIMEUP_DURATION_MS;
-    assert(ticks_count == 1 && "delays between updates greater than 2 ticks are not handled ATM");
 
-    timer_tick(t);
+#ifdef EXIT_AT_MULTIPLE_TICKS
+    log_fatal("delays between updates greater than 2 ticks are not handled ATM")
+#else
+    while (ticks_count--) {
+        timer_tick(t);
+    }
+#endif
 }
 
 bool timer_is_active(const struct timer* t)

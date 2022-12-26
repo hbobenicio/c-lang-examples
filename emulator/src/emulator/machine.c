@@ -121,7 +121,6 @@ void machine_run(struct machine* m)
                         break;
                 }
             }
-            //TODO What should we do when getting more than 1 event between emulation cycles?
         }
         
         // Update Timers
@@ -146,7 +145,11 @@ void machine_run(struct machine* m)
         uint64_t cpu_run_wallclock_elapsed_time = cpu_run_wallclock_end_time_moment - cpu_run_start_time_moment;
         double cpu_run_wallclock_elapsed_time_ms = ((double) cpu_run_wallclock_elapsed_time / SDL_GetPerformanceFrequency()) * 1000;
 
-        log_debugf("cpu: clock control: work time: actual=%.2lfμs simulated=%.2lfms", cpu_run_elapsed_time_us, cpu_run_wallclock_elapsed_time_ms);
+        log_tracef(
+            "cpu: clock control: work time: actual=%.2lfμs simulated=%.2lfms",
+            cpu_run_elapsed_time_us,
+            cpu_run_wallclock_elapsed_time_ms
+        );
 
         // Render
         display_render(&m->display);

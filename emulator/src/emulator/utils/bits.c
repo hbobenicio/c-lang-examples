@@ -12,3 +12,13 @@ bool bit_is_set(uint8_t num, uint8_t bit_order)
     
     return false;
 }
+
+uint8_t bit_most_significant(uint8_t num)
+{
+    return (uint8_t) bit_is_set(num, 7);
+}
+
+uint8_t bit_least_significant(uint8_t num)
+{
+    return (uint8_t) bit_is_set(num, 0);
+}

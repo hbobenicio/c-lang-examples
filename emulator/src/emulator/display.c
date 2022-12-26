@@ -113,9 +113,12 @@ bool display_draw_sprite(struct display* d, Register x, Register y, uint8_t* spr
             Pixel new_pixel = bit_is_set(sprite_byte, bit);
             Pixel* current_pixel = &d->buffer[(pixel_x + offset_x) % DISPLAY_WIDTH][pixel_y];
 
-            if (*current_pixel && new_pixel) {
+            if (*current_pixel && !new_pixel) {
                 pixel_erased = true;
             }
+            // if (*current_pixel != new_pixel) {
+            //     pixel_erased = true;
+            // }
 
             *current_pixel ^= new_pixel;
         }

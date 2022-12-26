@@ -1,12 +1,14 @@
 #pragma once
 
 #include <stdint.h>
+#include <limits.h>
 
 #include "memory.h"
 #include "register.h"
 
 typedef uint16_t Word;
 #define OPCODE_FMT "0x%04X"
+#define WORD_MAX UINT16_MAX
 
 typedef uint8_t Const;
 #define CONST_FMT "0x%02X"
