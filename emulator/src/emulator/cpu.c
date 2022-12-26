@@ -19,11 +19,12 @@
 
 #define LOG_TAG "cpu"
 
-#define UNIMPLEMENTED() \
-    log_fatalf("TODO: unimplemented function %s at:\n>>> %s:%d", __func__, __FILE__, __LINE__)
+// #define UNIMPLEMENTED() \
+//     log_fatalf("TODO: unimplemented function %s at:\n>>> %s:%d", __func__, __FILE__, __LINE__)
 
 static Word fetch_opcode(struct cpu* cpu);
 static void cpu_pc_advance(struct cpu* cpu);
+static void cpu_pc_advance_back(struct cpu* cpu);
 static void cpu_goto_address(struct cpu* cpu, Address address);
 static void cpu_stack_push(struct cpu* cpu, Address address);
 static Address cpu_stack_pop(struct cpu* cpu);
@@ -161,6 +162,11 @@ static void cpu_pc_advance(struct cpu* cpu)
     cpu->pc += sizeof(Word);
 }
 
+static void cpu_pc_advance_back(struct cpu* cpu)
+{
+    cpu->pc -= sizeof(Word);
+}
+
 static void cpu_goto_address(struct cpu* cpu, Address address)
 {
     cpu->pc = address;
@@ -202,7 +208,7 @@ static void exec_return(struct cpu* cpu, Word opcode)
 
 static void exec_call(struct cpu* cpu, Word opcode)
 {
-    fprintf(stderr, "warn: cpu: obsolete instruction NATIVE CALL\n");
+    log_warn("obsolete instruction NATIVE CALL");
     Address address = opcode_decode_address(opcode);
     
     cpu_stack_push(cpu, cpu->pc);
@@ -454,12 +460,13 @@ static void exec_set_vx_from_key(struct cpu* cpu, Word opcode)
     // Wait for a key press, store the value of the key in Vx.
     // All execution stops until a key is pressed, then the value of that key is stored in Vx.
     //
-    (void) cpu;
     Register x = opcode_decode_register_x(opcode);
-    (void) x;
-
-    // fprintf(stream, REGISTER_FMT " = get_key()\n", x);
-    UNIMPLEMENTED();
+    KeyValue key;
+    if (keyboard_get_pressed_key(&key)) {
+        cpu->registers[x] = key;
+    } else {
+        cpu_pc_advance_back(cpu);
+    }
 }
 
 static void exec_set_delay_timer_from_vx(struct cpu* cpu, Word opcode)

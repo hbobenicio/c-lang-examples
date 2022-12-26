@@ -15,8 +15,7 @@ static void init_sdl(struct display* d);
 void display_init(struct display* d)
 {
     init_sdl(d);
-    
-    memset(d->buffer, 0, sizeof(d->buffer));
+    display_clear(d);
 }
 
 void display_free(struct display* d)
@@ -28,12 +27,17 @@ void display_free(struct display* d)
 
 void display_clear(struct display* d)
 {
-    SDL_SetRenderDrawColor(d->renderer, 0, 0, 0, 0);
-    SDL_RenderClear(d->renderer);
+    // SDL_SetRenderDrawColor(d->renderer, 0, 0, 0, 0);
+    // SDL_RenderClear(d->renderer);
+    memset(d->buffer, 0, sizeof(d->buffer));
 }
 
 void display_render(struct display* d)
 {
+    // Background
+    // SDL_SetRenderDrawColor(d->renderer, 0, 0, 0, 0);
+    // SDL_RenderClear(d->renderer);
+
     // Viewport rect for each pixel
     SDL_Rect r = {0};
     r.w = DISPLAY_SCALE;

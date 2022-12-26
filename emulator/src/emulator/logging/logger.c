@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #include "level.h"
 #include <emulator/config.h>

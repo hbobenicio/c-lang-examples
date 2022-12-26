@@ -57,6 +57,7 @@ void machine_load_rom(struct machine* m, const char* rom_file_path)
         buffer_free(&rom);
         exit(1);
     }
+    log_debugf("rom size = %zu", rom.capacity);
 
     // zero program memory area
     memset(&m->memory[MEMORY_PROGRAM_STARTING_ADDRESS], 0, PROGRAM_MAX_SIZE);
@@ -155,7 +156,7 @@ void machine_run(struct machine* m)
         //     So we're relying on that as rendering is happening on the same thread as the CPU execution.
     }
 loop_exit:
-    fprintf(stderr, "info: machine: finishing emulation...");
+    log_info("finishing emulation...");
 }
 
 static Word machine_first_opcode(struct machine* m)

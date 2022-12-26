@@ -41,7 +41,9 @@ static void load_font_sprites(uint8_t* mem)
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80, // F
     };
-    assert(sizeof(font_sprites) == FONT_COUNT * FONT_SPRITE_SIZE);
+
+    // assert(sizeof(font_sprites) == FONT_COUNT * FONT_SPRITE_SIZE);
+    static_assert(sizeof(font_sprites) == FONT_COUNT * FONT_SPRITE_SIZE, "Unexpected font sprites array size");
 
     memcpy(mem + FONT_MEM_ADDRESS, font_sprites, sizeof(font_sprites));
 }
