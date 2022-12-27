@@ -35,8 +35,8 @@ void display_clear(struct display* d)
 void display_render(struct display* d)
 {
     // Background
-    // SDL_SetRenderDrawColor(d->renderer, 0, 0, 0, 0);
-    // SDL_RenderClear(d->renderer);
+    SDL_SetRenderDrawColor(d->renderer, 0, 0, 0, 0);
+    SDL_RenderClear(d->renderer);
 
     // Viewport rect for each pixel
     SDL_Rect r = {0};
@@ -59,7 +59,10 @@ void display_render(struct display* d)
             }
         }
     }
+}
 
+void display_render_flush(struct display* d)
+{
     SDL_RenderPresent(d->renderer);
 }
 

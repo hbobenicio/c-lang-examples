@@ -27,5 +27,6 @@ void display_free(struct display* d);
 
 void display_clear(struct display* d);
 void display_render(struct display* d);
+void display_render_flush(struct display* d);
 
 bool display_draw_sprite(struct display* d, Register x, Register y, uint8_t* sprite, uint8_t sprite_len);

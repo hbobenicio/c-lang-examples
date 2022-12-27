@@ -102,8 +102,11 @@ void machine_run(struct machine* m)
     timer_start(&m->sound_timer);
 
     // Emulation Main Loop
+    // uint64_t cpu_timer_start = SDL_GetTicks64();
     while (true)
     {
+        // uint64_t fps_timer_start = SDL_GetTicks64();
+
         {
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
@@ -128,6 +131,7 @@ void machine_run(struct machine* m)
         timer_update(&m->sound_timer);
 
         // Update CPU: Executes a single instruction (step) and performs clock speed control
+        // Tentativa 1
         uint64_t cpu_run_start_time_moment = SDL_GetPerformanceCounter();
         cpu_step(&m->cpu);
         uint64_t cpu_run_end_time_moment = SDL_GetPerformanceCounter();
@@ -151,13 +155,28 @@ void machine_run(struct machine* m)
             cpu_run_wallclock_elapsed_time_ms
         );
 
-        // Render
+        // Tentativa 2
+        // uint64_t cpu_timer_end = SDL_GetTicks64();
+        // uint64_t cpu_timer_elapsed = cpu_timer_end - cpu_timer_start;
+        // uint64_t cpu_run_config_duration_ms = 1000 / config()->cpu_clock_speed_hz;
+        // if (cpu_timer_elapsed >= cpu_run_config_duration_ms) {
+            // cpu_step(&m->cpu);
+        //     cpu_timer_start = SDL_GetTicks64();
+        // }
+
+        // Render the full display
         display_render(&m->display);
 
-        //NOTE We do not perform direct FPS control because the desired CPU clock emulation speed is
-        //     already slow under control.
-        //     So we're relying on that as rendering is happening on the same thread as the CPU execution.
+        // Finish rendering and flush the back buffer into screen
+        // uint64_t fps_timer_end = SDL_GetTicks64();
+        // uint64_t fps_timer_elapsed_ms = fps_timer_end - fps_timer_start;
+        // if (fps_timer_elapsed_ms < (1000/60)) {
+        //     uint32_t sleep_duration_ms = (1000/60) - fps_timer_elapsed_ms;
+        //     SDL_Delay(sleep_duration_ms);
+        // }
+        display_render_flush(&m->display);
     }
+
 loop_exit:
     log_info("finishing emulation...");
 }
