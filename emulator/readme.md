@@ -2,6 +2,11 @@
 
 A chip-8 machine emulator.
 
+## Configuration
+
+- CPU_CLOCK_HZ. Default: `600`
+- LOG_LEVEL (trace|debug|info|warn|error|fatal). Default: `info`
+
 ## Improvements
 
 - `PONG` and `PONG2` rendering makes the screen "blink". Implement a double buffering for the display
