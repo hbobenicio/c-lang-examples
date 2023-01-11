@@ -14,6 +14,12 @@
 #define LOG_RECORD_MSG_MAX_SIZE 1024
 #endif
 
+/**
+ * @brief The main logging function
+ * 
+ * @param record 
+ * @param ... 
+ */
 void log_log(struct log_record record, ...)
 {
     if (record.level < config()->log_level) {

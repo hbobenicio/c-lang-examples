@@ -12,6 +12,8 @@ enum log_level {
     LOG_LEVEL_FATAL,
 };
 
+// Macros with string representations of each log level
+
 #define LOG_LEVEL_TRACE_STR "trace"
 #define LOG_LEVEL_DEBUG_STR "debug"
 #define LOG_LEVEL_INFO_STR  "info"
