@@ -65,7 +65,6 @@ int main(void) {
 
         // _http_headers_parse(request_buffer, bytes_received);
 
-        //TODO snprintf response body to produce Content-Length
         const char response_body[] = "It Works!\n";
         const size_t response_body_len = sizeof(response_body) - 1;
 
