@@ -15,27 +15,36 @@
 
 #define DYNAMIC_ARRAY_IMPLEMENTATION
 #include "dynamic-array.h"
-#undef DYNAMIC_ARRAY_IMPLEMENTATION
 
 #include "str.h"
 #include "net.h"
 #include "http.h"
+#include "config.h"
 
-int main(void) {
+int main(void)
+{
     fprintf(stderr, "info: server: initializing...\n");
 
+    struct config config;
+    int rc = config_init_from_env(&config);
+    if (rc != 0) {
+        fprintf(stderr, "error: config: bad config.\n");
+        exit(1);
+    }
+
+    // 1. socket
     int server_socket = tcp_socket_or_exit();
 
-    const char* host = "127.0.0.1";
-    const uint16_t port = 8080;
-    struct sockaddr_in server_address = ipv4_address_create(host, port);
+    struct sockaddr_in server_address = ipv4_address_create(config.server_host, config.server_port);
 
+    // 2. bind
     if (bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address)) != 0) {
         fprintf(stderr, "error: tcp: socket bind: failed: %s\n", strerror(errno));
         close(server_socket);
         exit(1);
     }
 
+    // 3. listen
     int backlog = 10;
     if (listen(server_socket, backlog) != 0) {
         fprintf(stderr, "error: socket listening: failed: %s\n", strerror(errno));
@@ -43,9 +52,10 @@ int main(void) {
         exit(1);
     }
 
+    // 4. accept
     struct sockaddr_in client_address = {0};
     socklen_t client_address_len = sizeof(client_address);
-    fprintf(stderr, "info: server is ready for connections at %s:%hu\n", host, port);
+    fprintf(stderr, "info: server is ready for connections at %s:%hu\n", config.server_host, config.server_port);
     int client_socket = accept(server_socket, (struct sockaddr*) &client_address, &client_address_len);
     if (client_socket < 0) {
         fprintf(stderr, "error: socket accept: failed: %s\n", strerror(errno));

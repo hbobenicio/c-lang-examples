@@ -3,58 +3,69 @@
 #include <stdio.h>
 #include <assert.h>
 
-struct http_header_iter http_header_iter_from_headers(struct str_slice headers)
+#include "scanner.h"
+
+void http_request_init(struct http_request* req, struct str_slice input)
 {
-    return (struct http_header_iter) {
-        .headers_buffer = headers,
-        .header = {0},
-        .done = false,
-    };
+    assert(req != NULL);
+    req->input = input;
+    int rc = dynamic_array_init_with_capacity(&req->headers, 4098);
+    assert(rc == 0);
 }
 
-struct http_header_iter http_header_next(struct http_header_iter iter)
+int http_request_parse(struct http_request* req)
 {
-    const char* buf = iter.headers_buffer.ptr;
-    size_t buf_len = iter.headers_buffer.len;
+    fprintf(stderr, "debug: http: request: parsing...\n");
 
-    int state = 0;
-    for (const char* end = buf; *end != '\0'; end++) {
-        size_t offset = (size_t) (end - buf);
-        if (offset >= buf_len) {
-            break;
-        }
-
-        char c = *end;
-
-        if (state == 0 && c == '\r') {
-            state = 1;
-            continue;
-        }
-        if (state == 1 && c == '\n') {
-            state = 2;
-            continue;
-        }
-        if (state == 2) {
-            //FIXME refactor state machine so that it includes the end of the headers with \r\n\r\n (and skip whitespaces)
-            struct http_header_iter header = {
-                .headers_buffer = {
-                    .ptr = buf + offset,
-                    .len = buf_len - offset,
-                },
-                .header = {
-                    .key = str_slice_empty(), //TODO parse it!   (offset - 2 is the total length)
-                    .value = str_slice_empty(), //TODO parse it!
-                },
-                .done = false,
-            };
-            return header;
-        }
-        state = 0;
+    int rc = http_request_headers_parse(req);
+    if (rc != 0) {
+        fprintf(stderr, "error: http: request: parsing failed.\n");
+        return 1;
     }
-    return (struct http_header_iter) {
-        .headers_buffer = {0},
-        .header = {0},
-        .done = true,
+
+    fprintf(stderr, "debug: http: request: parsing success.\n");
+    return 0;
+}
+
+int http_request_headers_parse(struct http_request* req)
+{
+    fprintf(stderr, "debug: http: request: headers: parsing...\n");
+
+    // while not "\r\n\r\n":
+    //     try header_parse()
+    int rc = http_request_header_parse(req);
+    if (rc != 0) {
+        fprintf(stderr, "debug: http: request: headers: parsing failed.\n");
+        return 1;
+    }
+
+    fprintf(stderr, "debug: http: request: headers: parsing success.\n");
+    return 0;
+}
+
+int http_request_header_parse(struct http_request* req)
+{
+    fprintf(stderr, "debug: http: request: header: parsing...\n");
+
+    struct scanner s = { .input = req->input };
+    struct str_slice eol = str_slice_from_cstr_trusted("\r\n");
+    struct str_slice header_slice;
+
+    int rc = scanner_next_until_slice(&s, eol, &header_slice);
+    if (rc != 0) {
+        fprintf(stderr, "debug: http: request: header: parsing failed.\n");
+        return 1;
+    }
+
+    //FIXME parse header key and value correctly
+    struct http_header header = {
+        .key = header_slice,
+        .value = header_slice,
     };
+
+    rc = dynamic_array_push_back(&req->headers, (const uint8_t*) &header, sizeof(header));
+    assert(rc == 0);
+
+    return 0;
 }
 

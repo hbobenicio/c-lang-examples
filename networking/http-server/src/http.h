@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include "dynamic-array.h"
 #include "str.h"
 
 struct http_header {
@@ -10,13 +11,17 @@ struct http_header {
     struct str_slice value;
 };
 
-struct http_header_iter {
-    struct str_slice headers_buffer;
-    struct http_header header;
-    bool done;
+struct http_request {
+    /**
+     * raw unsafe input data read from the connection socket. This should be the owned data where all slices and other
+     * borrows should reference too.
+     */ 
+    struct str_slice input;
+    struct dynamic_array headers;
 };
 
-struct http_header_iter http_header_iter_from_buffer(struct str_slice headers_buffer);
-struct http_header_iter http_header_next(struct http_header_iter iter);
-
+void http_request_init(struct http_request* req, struct str_slice input);
+int http_request_parse(struct http_request* req);
+int http_request_headers_parse(struct http_request* req);
+int http_request_header_parse(struct http_request* req);
 

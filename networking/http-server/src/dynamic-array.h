@@ -36,7 +36,9 @@ void dynamic_array_init(struct dynamic_array* self);
  int dynamic_array_init_with_capacity(struct dynamic_array* self, size_t initial_capacity);
 void dynamic_array_free(struct dynamic_array* self);
 bool dynamic_array_is_full(const struct dynamic_array* self);
- int dynamic_array_push_back(struct dynamic_array* self, uint8_t item);
+bool dynamic_array_would_overflow(const struct dynamic_array* self, size_t byte_count);
+ int dynamic_array_push_back_byte(struct dynamic_array* self, uint8_t item);
+ int dynamic_array_push_back(struct dynamic_array* self, const uint8_t* buffer, size_t buffer_len);
  int dynamic_array_ensure_capacity(struct dynamic_array* self, size_t required_capacity);
 
 #endif // DYNAMIC_ARRAY_H
@@ -44,7 +46,6 @@ bool dynamic_array_is_full(const struct dynamic_array* self);
 ////////////////////////////////
 // Implementation Definitions //
 ////////////////////////////////
-// #define DYNAMIC_ARRAY_IMPLEMENTATION
 #ifdef DYNAMIC_ARRAY_IMPLEMENTATION
 
 #include <assert.h>
@@ -95,11 +96,20 @@ void dynamic_array_free(struct dynamic_array* self)
 
 bool dynamic_array_is_full(const struct dynamic_array* self)
 {
-    assert(self);
+    assert(self != NULL);
     return self->length >= self->capacity;
 }
 
-int dynamic_array_push_back(struct dynamic_array* self, uint8_t item)
+bool dynamic_array_would_overflow(const struct dynamic_array* self, size_t byte_count)
+{
+    assert(self != NULL);
+    if (byte_count == 0) {
+        return dynamic_array_is_full(self);
+    }
+    return self->length + byte_count > self->capacity;
+}
+
+int dynamic_array_push_back_byte(struct dynamic_array* self, uint8_t item)
 {
     assert(self != NULL);
 
@@ -118,6 +128,28 @@ int dynamic_array_push_back(struct dynamic_array* self, uint8_t item)
     return 0;
 }
 
+int dynamic_array_push_back(struct dynamic_array* self, const uint8_t* buffer, size_t buffer_len)
+{
+    assert(self != NULL);
+    assert(buffer != NULL);
+    assert(buffer_len > 0);
+
+    if (dynamic_array_would_overflow(self, buffer_len)) {
+        size_t extra_count = (self->length + buffer_len) - self->capacity;
+        size_t new_capacity = (self->capacity == 0)
+                            ? DYNAMIC_ARRAY_INITIAL_CAPACITY
+                            : DYNAMIC_ARRAY_GROW_FACTOR * (self->capacity + extra_count);
+        self->items = (uint8_t*) realloc(self->items, new_capacity);
+        if (self->items == NULL) {
+            return 1;
+        }
+        self->capacity = new_capacity;
+    }
+    memcpy(self->items + self->length, buffer, buffer_len);
+    self->length += buffer_len;
+    return 0;
+}
+
 int dynamic_array_ensure_capacity(struct dynamic_array* self, size_t required_capacity)
 {
     assert(self);
@@ -128,5 +160,6 @@ int dynamic_array_ensure_capacity(struct dynamic_array* self, size_t required_ca
     return 1;
 }
 
-#endif
+#undef DYNAMIC_ARRAY_IMPLEMENTATION
+#endif // DYNAMIC_ARRAY_IMPLEMENTATION
 

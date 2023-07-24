@@ -33,3 +33,9 @@ struct str_slice str_slice_from_buffer(const char* buf, size_t buf_len)
         .len = buf_len,
     };
 }
+
+bool str_slice_is_empty(struct str_slice s)
+{
+    return s.ptr == NULL || s.len == 0;
+}
+
