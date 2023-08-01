@@ -16,3 +16,6 @@ struct str_slice str_slice_from_buffer(const char* buf, size_t buf_len);
 
 bool str_slice_is_empty(struct str_slice s);
 
+// Parsing Utilities
+int parse_ul(const char* input, unsigned long* output);
+
