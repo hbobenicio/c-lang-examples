@@ -4,6 +4,7 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
+#include <assert.h>
 
 struct str_slice str_slice_empty(void)
 {
@@ -42,16 +43,19 @@ bool str_slice_is_empty(struct str_slice s)
     return s.ptr == NULL || s.len == 0;
 }
 
-int parse_ul(const char* input, unsigned long* output)
+enum return_code parse_ull(const char* input, unsigned long long* output)
 {
+    assert(input != NULL);
+    assert(output != NULL);
+
     char* endptr = NULL;
     errno = 0;
-    unsigned long value = strtoul(input, &endptr, 10);
-    if (errno != 0 || value >= ULONG_MAX) {
-        return 1;
+    unsigned long long value = strtoull(input, &endptr, 10);
+    if (errno != 0 || value == ULLONG_MAX) {
+        return RC_ERROR;
     }
 
     *output = value;
-    return 0;
+    return RC_OK;
 }
 
