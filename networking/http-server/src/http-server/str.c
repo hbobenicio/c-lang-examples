@@ -43,19 +43,14 @@ bool str_slice_is_empty(struct str_slice s)
     return s.ptr == NULL || s.len == 0;
 }
 
-enum return_code parse_ull(const char* input, unsigned long long* output)
+void str_slice_print(struct str_slice s, FILE* file)
 {
-    assert(input != NULL);
-    assert(output != NULL);
+    fwrite(s.ptr, 1, s.len, file);
+}
 
-    char* endptr = NULL;
-    errno = 0;
-    unsigned long long value = strtoull(input, &endptr, 10);
-    if (errno != 0 || value == ULLONG_MAX) {
-        return RC_ERROR;
-    }
-
-    *output = value;
-    return RC_OK;
+void str_slice_println(struct str_slice s, FILE* file)
+{
+    str_slice_print(s, file);
+    putc('\n', file);
 }
 

@@ -9,18 +9,28 @@ option(PERF "Enables/Disables compiler flags for perf analysis" OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(http-server
-    "${CMAKE_SOURCE_DIR}/src/str.c"
-    "${CMAKE_SOURCE_DIR}/src/scanner.c"
-    "${CMAKE_SOURCE_DIR}/src/net.c"
-    "${CMAKE_SOURCE_DIR}/src/http.c"
-    "${CMAKE_SOURCE_DIR}/src/config.c"
-    "${CMAKE_SOURCE_DIR}/src/main.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/commons.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/str.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/io.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/stopwatch.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/scanner.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/net.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/http/method.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/http/parser.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/http/server.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/http.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/config.c"
+    "${CMAKE_SOURCE_DIR}/src/http-server/main.c"
 )
 
 target_compile_options(http-server PRIVATE
     "-std=c18"
     "-Wall" "-Wextra" "-Wpedantic" "-Werror=vla"
     "-D_POSIX_C_SOURCE=200809" "-D_GNU_SOURCE"
+)
+
+target_include_directories(http-server PRIVATE
+    "${CMAKE_SOURCE_DIR}/src"
 )
 
 if(SANITIZE)

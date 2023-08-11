@@ -27,10 +27,9 @@ int tcp_socket_or_exit(void)
 
 struct sockaddr_in ipv4_address_create(const char* ip, uint16_t port)
 {
-    struct sockaddr_in address = {0};
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr(ip);
-    address.sin_port = htons(port);
-    return address;
+    return (struct sockaddr_in) {
+        .sin_family = AF_INET,
+        .sin_addr.s_addr = inet_addr(ip),
+        .sin_port = htons(port),
+    };
 }
-

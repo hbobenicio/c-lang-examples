@@ -8,6 +8,14 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#ifndef MAX
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+#endif
+
+#ifndef MIN
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#endif
+
 #define DYNAMIC_ARRAY_INITIAL_CAPACITY 8
 #define DYNAMIC_ARRAY_GROW_FACTOR      2
 
@@ -134,10 +142,11 @@ int dynamic_array_push_back(struct dynamic_array* self, const uint8_t* buffer, s
     assert(buffer != NULL);
     assert(buffer_len > 0);
 
+    //TODO after implementing dynamic_array_ensure_capacity refactor this to use it
     if (dynamic_array_would_overflow(self, buffer_len)) {
         size_t extra_count = (self->length + buffer_len) - self->capacity;
         size_t new_capacity = (self->capacity == 0)
-                            ? DYNAMIC_ARRAY_INITIAL_CAPACITY
+                            ? MAX(DYNAMIC_ARRAY_INITIAL_CAPACITY, extra_count)
                             : DYNAMIC_ARRAY_GROW_FACTOR * (self->capacity + extra_count);
         self->items = (uint8_t*) realloc(self->items, new_capacity);
         if (self->items == NULL) {
@@ -162,4 +171,3 @@ int dynamic_array_ensure_capacity(struct dynamic_array* self, size_t required_ca
 
 #undef DYNAMIC_ARRAY_IMPLEMENTATION
 #endif // DYNAMIC_ARRAY_IMPLEMENTATION
-

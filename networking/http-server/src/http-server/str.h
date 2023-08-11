@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdio.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdbool.h>
@@ -18,6 +19,5 @@ struct str_slice str_slice_from_buffer(const char* buf, size_t buf_len);
 
 bool str_slice_is_empty(struct str_slice s);
 
-// Parsing Utilities
-enum return_code parse_ull(const char* input, unsigned long long* output);
-
+void str_slice_print(struct str_slice s, FILE* file);
+void str_slice_println(struct str_slice s, FILE* file);

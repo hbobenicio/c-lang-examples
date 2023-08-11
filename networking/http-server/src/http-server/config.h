@@ -20,8 +20,11 @@ struct config {
 };
 
 /**
- * Initializes the configuration from environment variables values.
- *
- * @param c The configuration to be loaded, where data should be saved
+ * @brief returns the global instance of the configuration
  */
-enum return_code config_init_from_env(struct config* c);
+const struct config* config_get(void);
+
+/**
+ * @brief Initializes the configuration from environment variables values.
+ */
+enum result config_init_from_env(void);
