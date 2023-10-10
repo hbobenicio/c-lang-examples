@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <unistd.h>
 #include <signal.h>
 #include <poll.h>
 #include <sys/types.h>
@@ -10,6 +11,7 @@
 #define DYNAMIC_ARRAY_IMPLEMENTATION
 #include "dynamic-array.h"
 
+#include "commons.h"
 #include "error.h"
 #include "str.h"
 #include "io.h"
@@ -75,11 +77,13 @@ int main(void)
 
         ssize_t bytes_read;
         uint8_t unsafe_buffer[4096] = {0};
-        const size_t unsafe_buffer_size = sizeof(unsafe_buffer);
+        const size_t unsafe_buffer_size = ARRAY_SIZE(unsafe_buffer);
+        const size_t unsafe_buffer_max_size = unsafe_buffer_size - 1; // this will ensure it'll end up being a c-str
 
-        //NOTE this returns the raw unsafe data read from the client socket so it can contain `\0` and other bad bytes...
+        //NOTE this returns the raw unsafe data read from the client socket
+        //     so it can contain `\0` and other bad bytes...
         if (recv_or_timeout(client_socket,
-                            unsafe_buffer, unsafe_buffer_size,
+                            unsafe_buffer, unsafe_buffer_max_size,
                             config->read_timeout_ms,
                             &bytes_read) != RESULT_OK)
         {
@@ -90,11 +94,13 @@ int main(void)
             LOG_WARN("client disconnected or did not send http headers within read timeout");
             goto end_of_request;
         }
+        assert((size_t) bytes_read <= unsafe_buffer_max_size);
 
         LOG_DEBUGF("%ld bytes read", bytes_read);
 
         // Validate/sanitize unsafe input date here...
 
+        // this validation ensures it does not contain invalid bytes like '\0' before |bytes_read| and \r\n\r\n
         size_t end_of_headers_offset = 0;
         if (http_headers_validate(unsafe_buffer, bytes_read, &end_of_headers_offset) != RESULT_OK) {
             //TODO write back bad request maybe?
@@ -102,9 +108,12 @@ int main(void)
             goto end_of_request;
         }
 
+        // after validation, unsafe_buffer is now trusted which means it contains no invalid byte.
+        // check validation function for more info.
+
         //TODO implement http header parsing...
 
-        LOG_DEBUG("parsed headers:");
+        LOG_DEBUG("parsed request headers:");
         fwrite(unsafe_buffer, sizeof(uint8_t), end_of_headers_offset, stdout);
         fputc('\n', stdout);
 

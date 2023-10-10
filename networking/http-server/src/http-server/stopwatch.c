@@ -7,7 +7,6 @@ static void assert_clock_gettime(struct timespec* ts)
     assert(ts != NULL);
 
     int rc = clock_gettime(CLOCK_MONOTONIC, ts);
-
     assert(rc == 0);
     (void) rc;
 }

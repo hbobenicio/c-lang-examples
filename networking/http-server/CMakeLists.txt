@@ -25,7 +25,7 @@ add_executable(http-server
 
 target_compile_options(http-server PRIVATE
     "-std=c18"
-    "-Wall" "-Wextra" "-Wpedantic" "-Werror=vla"
+    "-Wall" "-Wextra" "-Wpedantic" "-Werror=vla" "-Wswitch-enum"
     "-D_POSIX_C_SOURCE=200809" "-D_GNU_SOURCE"
 )
 

@@ -8,13 +8,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#ifndef MAX
-#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
-#endif
-
-#ifndef MIN
-#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
-#endif
+#include "commons.h"
 
 #define DYNAMIC_ARRAY_INITIAL_CAPACITY 8
 #define DYNAMIC_ARRAY_GROW_FACTOR      2
