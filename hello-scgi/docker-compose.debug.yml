@@ -1,0 +1,8 @@
+services:
+
+  nginx:
+    command: [ 'nginx-debug', '-g', 'daemon off;' ]
+
+  app:
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
